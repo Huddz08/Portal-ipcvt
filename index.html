@@ -5,106 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Núcleo IPCVT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fontes Google: Merriweather para Títulos (Serif) e Inter para Interface (Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        // Verde característico da Igreja Presbiteriana (IPB)
-                        'ipb-green': '#006B3F', 
-                        'ipb-light': '#008c52',
-                        'ipb-dark': '#004d2d',
-                        // Dourado para o texto IPCVT
-                        'ipb-gold': '#F5C518',
+                        'presb-green': '#1B4332', // Verde oficial IPB
+                        'presb-gold': '#D4AF37',  // Dourado clássico
+                        'presb-dark': '#0d2119',
+                    },
+                    fontFamily: {
+                        'serif': ['Merriweather', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    <!-- Biblioteca de Ícones Lucide -->
+    <!-- Ícones Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans text-gray-800 selection:bg-ipb-green selection:text-white flex flex-col">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800 flex flex-col">
     
-    <!-- Cabeçalho -->
-    <header class="bg-ipb-green text-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-5 flex items-center justify-center md:justify-between">
-            <div class="flex items-center gap-3">
-                <i data-lucide="church" class="w-7 h-7"></i>
-                <h1 class="text-xl md:text-2xl font-bold tracking-wide">Portal Núcleo <span class="text-ipb-gold">IPCVT</span></h1>
+    <!-- Cabeçalho Institucional -->
+    <header class="bg-presb-green text-white shadow-2xl border-b-4 border-presb-gold sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="p-2 bg-white/10 rounded-xl border border-white/20">
+                    <i data-lucide="church" class="w-7 h-7 text-presb-gold"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black font-serif tracking-tight leading-none">Núcleo <span class="text-presb-gold">IPCVT</span></h1>
+                    <p class="text-[9px] uppercase tracking-[0.3em] font-bold text-white/50 mt-1">Administração Eclesiástica</p>
+                </div>
             </div>
-            <p class="hidden md:block text-xs font-medium opacity-90 bg-ipb-dark px-3 py-1 rounded-full uppercase tracking-wider">
-                Sistemas Internos
-            </p>
+            <div class="hidden md:flex items-center gap-3">
+                <span class="text-[10px] font-bold opacity-80 bg-presb-dark px-4 py-2 rounded-full uppercase tracking-widest border border-white/10 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Sistemas Online
+                </span>
+            </div>
         </div>
     </header>
 
-    <!-- Conteúdo Principal -->
-    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full flex flex-col justify-center">
+    <!-- Área Principal -->
+    <main class="flex-grow max-w-6xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col justify-center">
         
-        <div class="mb-8 text-center">
-            <h2 class="text-2xl font-bold text-gray-800">Selecione o Aplicativo</h2>
-            <p class="text-gray-500 mt-1 text-sm md:text-base">Toque em um dos quadros abaixo para acessar</p>
+        <div class="mb-16 text-center max-w-2xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif mb-4">Central de Ferramentas</h2>
+            <div class="h-1 w-20 bg-presb-gold mx-auto mb-6 rounded-full"></div>
+            <p class="text-slate-500 text-sm md:text-base font-medium leading-relaxed">
+                Acesse abaixo os sistemas de gestão do Núcleo IPCVT. Cada ferramenta foi desenvolvida para organizar e facilitar o serviço da nossa comunidade.
+            </p>
         </div>
 
-        <!-- Grade de Quadros (Lado a Lado no Celular) -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto w-full">
+        <!-- Grade de Aplicativos -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 w-full">
 
-            <!-- Quadro 1: Escala do Louvor (Link Externo) -->
-            <a href="https://escala-louvor-public.web.app" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
-                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
-                    <i data-lucide="mic-2" class="w-8 h-8 md:w-10 md:h-10"></i>
+            <!-- Card: Escala do Louvor -->
+            <a href="https://escala-louvor-public.web.app" class="card-hover group flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 hover:border-presb-gold hover:shadow-2xl text-center">
+                <div class="bg-slate-50 text-presb-green p-6 rounded-3xl mb-6 group-hover:bg-presb-green group-hover:text-white transition-all duration-500 shadow-inner">
+                    <i data-lucide="mic-2" class="w-10 h-10"></i>
                 </div>
-                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Escala do<br>Louvor</h3>
-                <p class="text-xs text-gray-500 mt-2 hidden md:block">Organizar repertório e músicos.</p>
+                <h3 class="text-lg font-bold font-serif text-presb-green leading-tight">Escala do Louvor</h3>
+                <p class="text-xs text-slate-400 mt-4 leading-relaxed font-medium">Repertório, ensaios e gestão de músicos e equipes de cântico.</p>
+                <div class="mt-6 flex items-center text-presb-gold font-bold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    Acessar Sistema <i data-lucide="chevron-right" class="w-3 h-3 ml-1"></i>
+                </div>
             </a>
 
-            <!-- Quadro 2: Votação para Repertório -->
-            <a href="votacao.html" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
-                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
-                    <!-- Ícone customizado: Pódio de 1º, 2º e 3º lugar -->
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 md:w-10 md:h-10">
-                        <path d="M3 22h18" />
-                        <path d="M9 22V8h6v14" />
-                        <path d="M3 22V12h6" />
-                        <path d="M15 16h6v6" />
-                    </svg>
+            <!-- Card: Votação -->
+            <a href="votacao.html" class="card-hover group flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 hover:border-presb-gold hover:shadow-2xl text-center">
+                <div class="bg-slate-50 text-presb-green p-6 rounded-3xl mb-6 group-hover:bg-presb-green group-hover:text-white transition-all duration-500 shadow-inner">
+                    <i data-lucide="vote" class="w-10 h-10"></i>
                 </div>
-                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Votação de<br>Repertório</h3>
-                <p class="text-xs text-gray-500 mt-2 hidden md:block">Escolha interativa de músicas.</p>
+                <h3 class="text-lg font-bold font-serif text-presb-green leading-tight">Votação de Músicas</h3>
+                <p class="text-xs text-slate-400 mt-4 leading-relaxed font-medium">Sugestões e escolha democrática do repertório congregacional.</p>
+                <div class="mt-6 flex items-center text-presb-gold font-bold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    Votar Agora <i data-lucide="chevron-right" class="w-3 h-3 ml-1"></i>
+                </div>
             </a>
 
-            <!-- Quadro 3: Escala Geral -->
-            <a href="escala_geral.html" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
-                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
-                    <i data-lucide="calendar-days" class="w-8 h-8 md:w-10 md:h-10"></i>
+            <!-- Card: Escala Geral -->
+            <a href="escala_geral.html" class="card-hover group flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 hover:border-presb-gold hover:shadow-2xl text-center">
+                <div class="bg-slate-50 text-presb-green p-6 rounded-3xl mb-6 group-hover:bg-presb-green group-hover:text-white transition-all duration-500 shadow-inner">
+                    <i data-lucide="calendar-check" class="w-10 h-10"></i>
                 </div>
-                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Escala<br>Geral</h3>
-                <p class="text-xs text-gray-500 mt-2 hidden md:block">Recepção, Som, Diaconia, etc.</p>
+                <h3 class="text-lg font-bold font-serif text-presb-green leading-tight">Escala Geral</h3>
+                <p class="text-xs text-slate-400 mt-4 leading-relaxed font-medium">Gestão de Mídia, Som, Recepção, Fotografia e Diaconia.</p>
+                <div class="mt-6 flex items-center text-presb-gold font-bold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    Ver Escalas <i data-lucide="chevron-right" class="w-3 h-3 ml-1"></i>
+                </div>
             </a>
 
-            <!-- Quadro 4: Vaquinhas -->
-            <a href="vaquinhas.html" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
-                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
-                    <i data-lucide="piggy-bank" class="w-8 h-8 md:w-10 md:h-10"></i>
+            <!-- Card: Interas -->
+            <a href="vaquinhas.html" class="card-hover group flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 hover:border-presb-gold hover:shadow-2xl text-center">
+                <div class="bg-slate-50 text-presb-green p-6 rounded-3xl mb-6 group-hover:bg-presb-green group-hover:text-white transition-all duration-500 shadow-inner">
+                    <i data-lucide="piggy-bank" class="w-10 h-10"></i>
                 </div>
-                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Vaquinhas</h3>
-                <p class="text-xs text-gray-500 mt-2 hidden md:block">Arrecadação e controle financeiro.</p>
+                <h3 class="text-lg font-bold font-serif text-presb-green leading-tight">Interas</h3>
+                <p class="text-xs text-slate-400 mt-4 leading-relaxed font-medium">Arrecadações colaborativas para projetos e eventos da nossa igreja.</p>
+                <div class="mt-6 flex items-center text-presb-gold font-bold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    Ver Projetos <i data-lucide="chevron-right" class="w-3 h-3 ml-1"></i>
+                </div>
             </a>
 
         </div>
     </main>
 
     <!-- Rodapé -->
-    <footer class="py-6 text-center text-gray-400 text-xs">
-        <p>&copy; 2026 Portal Núcleo IPCVT.</p>
+    <footer class="py-10 border-t border-slate-200 bg-white">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <div class="flex justify-center items-center gap-2 mb-4">
+                <i data-lucide="church" class="w-4 h-4 text-slate-300"></i>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">IPCVT • 2026</span>
+            </div>
+            <p class="text-[9px] text-slate-400 font-medium uppercase tracking-widest leading-loose">
+                "Pois dele, por ele e para ele são todas as coisas" <br>
+                <span class="text-presb-gold">Soli Deo Gloria</span>
+            </p>
+        </div>
     </footer>
 
+    <!-- Scripts da Interface -->
     <script>
-        // Inicializa os ícones do Lucide
+        // Inicializa ícones
         lucide.createIcons();
+    </script>
+
+    <!-- Scripts do Firebase -->
+    <script type="module">
+        // Importa as funções usando a CDN oficial do Firebase versão 11.6.1 (mais recente compatível com importação direta no navegador)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // Configuração do seu Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAg9w5QohkcmXUFRgLfSI5Sh1chnCD1Owc",
+            authDomain: "repertorio-ipcvt.firebaseapp.com",
+            projectId: "repertorio-ipcvt",
+            storageBucket: "repertorio-ipcvt.firebasestorage.app",
+            messagingSenderId: "774659782213",
+            appId: "1:774659782213:web:5e9cbf88fec30eb382152c",
+            measurementId: "G-DJ8E3VPMSY"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        
+        // Inicializa o Analytics (Métricas de visita, origem de tráfego, etc)
+        const analytics = getAnalytics(app);
+
+        console.log("🔥 Firebase e Analytics inicializados com sucesso no Portal!");
     </script>
 </body>
 </html>
-
-

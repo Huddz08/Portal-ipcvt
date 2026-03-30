@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Escala - Louvor Presbiteriano</title>
+    <title>Gestão de Escala - Núcleo IPCVT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
@@ -11,18 +11,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
+    <!-- Fontes Institucionais -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'presb-green': '#1B4332', /* Verde Escuro Clássico */
-                        'presb-gold': '#D4AF37', /* Dourado */
-                        'presb-light': '#F8FAFC',
+                        'presb-green': '#1B4332',
+                        'presb-gold': '#D4AF37',
+                        'presb-dark': '#0d2119',
                     },
                     fontFamily: {
                         'serif': ['Merriweather', 'serif'],
@@ -33,384 +34,314 @@
         }
     </script>
     <style>
-        /* Estilos customizados para a barra de rolagem da tabela */
         .table-container::-webkit-scrollbar { height: 10px; width: 10px; }
         .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-        .table-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-        .table-container::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .table-container::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #b8962d; }
         
-        /* Selects minimalistas na tabela */
-        .select-inline {
-            width: 100%;
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            padding: 4px;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+        .select-inline { width: 100%; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 6px; outline: none; cursor: pointer; transition: all 0.2s; }
         .select-inline:hover { background: rgba(255, 255, 255, 0.5); border-color: #cbd5e1; }
         .select-inline:focus { background: white; border-color: #D4AF37; box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2); }
-        .select-inline.filled { font-weight: 500; color: #1B4332; }
-        .select-inline.duplicated { font-weight: 700; color: #dc2626; background-color: #fef2f2; border-color: #fca5a5; }
+        .select-inline.filled { font-weight: 700; color: #1B4332; }
+        .select-inline.duplicated { font-weight: 800; color: #dc2626; background-color: #fef2f2; border-color: #fca5a5; }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
 
-    <!-- TELA DE LOGIN -->
-    <div id="login-screen" class="fixed inset-0 bg-presb-green flex items-center justify-center z-50 transition-opacity duration-500">
-        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 text-center transform transition-transform duration-500 scale-100" id="login-card">
-            <i class="ph-fill ph-book-open-text text-6xl text-presb-gold mb-4 inline-block"></i>
-            <h1 class="text-3xl font-bold tracking-wide font-serif text-presb-green uppercase mb-2">Núcleo<span class="text-presb-gold">IPCVT</span></h1>
-            <p class="text-slate-500 text-sm mb-8 font-medium">Digite a senha de acesso para continuar</p>
-            
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <input type="password" id="login-password" placeholder="Senha" required 
-                           class="w-full border-2 border-slate-200 rounded-lg px-4 py-3 outline-none focus:border-presb-gold focus:ring-4 focus:ring-presb-gold/20 text-center text-lg tracking-widest transition-all">
-                    <p id="login-error" class="text-red-500 text-sm mt-2 hidden font-medium animate-pulse">Senha incorreta. Tente novamente.</p>
-                </div>
-                <button type="submit" class="w-full bg-presb-green hover:bg-green-900 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all uppercase tracking-wide">
-                    Entrar
-                </button>
-            </form>
-            <p class="text-xs text-slate-400 mt-8">Uso exclusivo da equipe de gestão.</p>
-        </div>
-    </div>
-
-    <!-- APLICATIVO PRINCIPAL (Oculto até o login) -->
-    <div id="app-layout" class="hidden min-h-screen flex-col md:flex-row w-full opacity-0 transition-opacity duration-500">
+    <!-- APLICATIVO PRINCIPAL -->
+    <div id="app-layout" class="min-h-screen flex flex-col md:flex-row w-full">
         
-        <!-- Sidebar / Menu de Navegação -->
-        <nav class="bg-presb-green text-white w-full md:w-64 flex-shrink-0 shadow-2xl md:h-screen md:sticky top-0 z-20 border-r border-slate-800 flex flex-col justify-between">
+        <!-- Sidebar -->
+        <nav class="bg-presb-green text-white w-full md:w-64 flex-shrink-0 shadow-2xl md:h-screen md:sticky top-0 z-20 border-r border-black/20 flex flex-col justify-between">
             <div>
-                <div class="p-6 text-center border-b border-white/10 relative">
-                    <i class="ph-fill ph-book-open-text text-5xl text-presb-gold mb-3 inline-block"></i>
-                    <h1 class="text-xl font-bold tracking-wide font-serif uppercase">Núcleo<span class="text-presb-gold">IPCVT</span></h1>
-                    <p class="text-xs text-slate-300 mt-1 uppercase tracking-widest opacity-80">Gestão de Escalas</p>
-                    
-                    <!-- Botão Sair para Celular -->
-                    <button onclick="logout()" class="absolute top-6 right-6 md:hidden text-slate-400 hover:text-white" title="Sair">
-                        <i class="ph ph-sign-out text-2xl"></i>
-                    </button>
+                <div class="p-8 text-center border-b border-white/5">
+                    <i class="ph-fill ph-calendar-check text-5xl text-presb-gold mb-4 inline-block"></i>
+                    <h1 class="text-xl font-bold font-serif uppercase tracking-tight">Núcleo<span class="text-presb-gold">IPCVT</span></h1>
+                    <p class="text-[9px] text-white/40 mt-1 uppercase tracking-[0.3em] font-bold">Escalas e Gestão</p>
                 </div>
-                <ul class="flex md:flex-col py-2 md:py-4 overflow-x-auto md:overflow-hidden w-full">
+                <ul class="flex md:flex-col py-4 overflow-x-auto md:overflow-hidden w-full">
                     <li class="flex-1 md:flex-none">
-                        <button onclick="switchTab('escalas')" id="tab-escalas" class="nav-btn w-full flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-2 md:px-6 py-3 md:py-4 hover:bg-white/10 transition-colors bg-white/10 border-b-4 md:border-b-0 md:border-l-4 border-presb-gold text-white">
-                            <i class="ph ph-table text-2xl md:text-xl"></i>
-                            <span class="text-[10px] md:text-sm font-medium">Escala Geral</span>
+                        <button onclick="attemptSwitchTab('escalas')" id="tab-escalas" class="nav-btn w-full flex flex-col md:flex-row items-center gap-3 px-6 py-5 hover:bg-white/5 transition-all text-white border-b-4 md:border-b-0 md:border-l-4 border-presb-gold bg-white/5">
+                            <i class="ph ph-table text-xl text-presb-gold"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">Escala Geral</span>
                         </button>
                     </li>
                     <li class="flex-1 md:flex-none">
-                        <button onclick="switchTab('substituicoes')" id="tab-substituicoes" class="nav-btn w-full flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-2 md:px-6 py-3 md:py-4 hover:bg-white/10 transition-colors border-b-4 md:border-b-0 md:border-l-4 border-transparent text-slate-400">
-                            <i class="ph ph-arrows-left-right text-2xl md:text-xl"></i>
-                            <span class="text-[10px] md:text-sm font-medium">Substituições</span>
+                        <button onclick="attemptSwitchTab('substituicoes')" id="tab-substituicoes" class="nav-btn w-full flex flex-col md:flex-row items-center gap-3 px-6 py-5 hover:bg-white/5 transition-all text-white/50 border-b-4 md:border-b-0 md:border-l-4 border-transparent relative">
+                            <i class="ph ph-arrows-left-right text-xl"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">Trocas</span>
+                            <i id="lock-substituicoes" class="ph-fill ph-lock-key absolute right-6 text-white/20 hidden md:block"></i>
                         </button>
                     </li>
                     <li class="flex-1 md:flex-none">
-                        <button onclick="switchTab('estatisticas')" id="tab-estatisticas" class="nav-btn w-full flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-2 md:px-6 py-3 md:py-4 hover:bg-white/10 transition-colors border-b-4 md:border-b-0 md:border-l-4 border-transparent text-slate-400">
-                            <i class="ph ph-chart-bar text-2xl md:text-xl"></i>
-                            <span class="text-[10px] md:text-sm font-medium">Estatísticas</span>
+                        <button onclick="attemptSwitchTab('estatisticas')" id="tab-estatisticas" class="nav-btn w-full flex flex-col md:flex-row items-center gap-3 px-6 py-5 hover:bg-white/5 transition-all text-white/50 border-b-4 md:border-b-0 md:border-l-4 border-transparent relative">
+                            <i class="ph ph-chart-pie text-xl"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">Relatórios</span>
+                            <i id="lock-estatisticas" class="ph-fill ph-lock-key absolute right-6 text-white/20 hidden md:block"></i>
                         </button>
                     </li>
                     <li class="flex-1 md:flex-none">
-                        <button onclick="switchTab('cadastro')" id="tab-cadastro" class="nav-btn w-full flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-2 md:px-6 py-3 md:py-4 hover:bg-white/10 transition-colors border-b-4 md:border-b-0 md:border-l-4 border-transparent text-slate-400">
-                            <i class="ph ph-users text-2xl md:text-xl"></i>
-                            <span class="text-[10px] md:text-sm font-medium">Cadastro</span>
+                        <button onclick="attemptSwitchTab('cadastro')" id="tab-cadastro" class="nav-btn w-full flex flex-col md:flex-row items-center gap-3 px-6 py-5 hover:bg-white/5 transition-all text-white/50 border-b-4 md:border-b-0 md:border-l-4 border-transparent relative">
+                            <i class="ph ph-users-three text-xl"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">Equipe</span>
+                            <i id="lock-cadastro" class="ph-fill ph-lock-key absolute right-6 text-white/20 hidden md:block"></i>
                         </button>
                     </li>
                 </ul>
             </div>
-            <div class="p-4 w-full text-center hidden md:block border-t border-white/10">
-                <button onclick="logout()" class="text-slate-400 hover:text-white text-sm flex items-center justify-center gap-2 w-full transition-colors py-2">
-                    <i class="ph ph-sign-out text-lg"></i> Sair do Sistema
+            <div id="admin-logout-container" class="hidden p-6 border-t border-white/5">
+                <button onclick="logoutAdmin()" class="w-full text-white/40 hover:text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-colors">
+                    <i class="ph ph-sign-out text-lg"></i> Sair da Edição
                 </button>
             </div>
         </nav>
 
-        <!-- Área de Conteúdo Principal -->
-        <main class="flex-1 p-4 md:p-8 w-full max-w-full overflow-hidden bg-slate-50">
+        <!-- Área de Conteúdo -->
+        <main class="flex-1 p-6 md:p-10 bg-slate-50 relative overflow-hidden flex flex-col">
             
-            <!-- SEÇÃO: ESCALAS -->
-            <section id="sec-escalas" class="tab-content block animate-fade-in">
-                <div class="mb-6 border-b border-slate-200 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div id="loading-data" class="absolute inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center">
+                <i class="ph ph-circle-notch text-6xl text-presb-gold animate-spin mb-4"></i>
+                <p class="text-presb-green font-black uppercase text-xs tracking-widest">Sincronizando Nuvem</p>
+            </div>
+
+            <!-- ESCALAS -->
+            <section id="sec-escalas" class="tab-content block animate-fade-in flex-1 flex flex-col">
+                <div class="mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                     <div>
-                        <h2 class="text-3xl font-bold text-presb-green font-serif">Escala Geral de Domingos</h2>
-                        <p class="text-slate-500 text-sm mt-1">Selecione os integrantes diretamente na tabela para preencher as escalas.</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Escala de Domingos</h2>
+                        <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic" id="escala-subtitle">
+                            Modo de visualização ativado.
+                        </p>
                     </div>
                     
-                    <!-- Filtros e Ações -->
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        <!-- Filtro de Mês -->
-                        <div class="w-full md:w-auto">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Filtrar por Mês</label>
-                            <select id="filtro-mes" onchange="renderEscalas()" class="w-full md:w-48 border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-presb-gold shadow-sm bg-white">
-                                <option value="">Todos os Meses</option>
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Botão Exportar PDF -->
-                        <div class="w-full sm:w-auto sm:self-end">
-                            <button onclick="exportarPDF()" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition-colors border border-red-700">
-                                <i class="ph ph-file-pdf text-xl"></i> Exportar PDF
-                            </button>
-                        </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                        <select id="filtro-mes" onchange="renderEscalas()" class="bg-white border-2 border-slate-200 text-slate-700 rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-widest shadow-sm outline-none focus:border-presb-gold">
+                            <option value="">Ano Inteiro</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option><option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option><option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                        <button onclick="exportarPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-md transition-all active:scale-95">
+                            <i class="ph-bold ph-file-pdf text-lg"></i> Exportar PDF
+                        </button>
+                        <button id="btn-toggle-edit" onclick="requestAuth('edit_escala')" class="bg-presb-gold hover:bg-yellow-600 text-presb-dark px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95">
+                            <i class="ph-bold ph-lock-key-open text-lg"></i> Habilitar Edição
+                        </button>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-                    <div class="table-container overflow-x-auto max-h-[75vh]">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
-                            <thead class="sticky top-0 z-30 shadow-sm" id="escala-table-head">
-                                <!-- Preenchido via JS -->
-                            </thead>
-                            <tbody id="escala-table-body" class="text-sm divide-y divide-slate-100">
-                                <!-- Preenchido via JS -->
-                            </tbody>
+                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden flex-1 flex flex-col">
+                    <div class="table-container overflow-x-auto flex-1">
+                        <table class="w-full text-left whitespace-nowrap border-collapse">
+                            <thead class="sticky top-0 z-30 shadow-sm" id="escala-table-head"></thead>
+                            <tbody id="escala-table-body" class="text-xs divide-y divide-slate-100 font-medium"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- SEÇÃO: SUBSTITUIÇÕES -->
+            <!-- SUBSTITUIÇÕES -->
             <section id="sec-substituicoes" class="tab-content hidden animate-fade-in">
-                <div class="mb-6 border-b border-slate-200 pb-4">
-                    <h2 class="text-3xl font-bold text-presb-green font-serif">Registro de Substituições</h2>
-                    <p class="text-slate-500 text-sm mt-1">Registre imprevistos baseados na escala atual do ano.</p>
+                <div class="mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Trocas e Faltas</h2>
+                    <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic">Gestão de imprevistos e coberturas.</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Formulário -->
-                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 lg:col-span-1 h-fit">
-                        <h3 class="font-serif font-bold text-lg mb-4 flex items-center gap-2 text-presb-green border-b border-slate-100 pb-2">
-                            <i class="ph ph-arrows-left-right text-presb-gold"></i> Nova Troca
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 lg:col-span-1 h-fit">
+                        <h3 class="font-serif font-bold text-lg mb-6 flex items-center gap-2 text-presb-green border-b border-slate-100 pb-4">
+                            <i class="ph-fill ph-arrows-left-right text-presb-gold"></i> Registrar Nova
                         </h3>
-                        <form id="form-substituicao" onsubmit="handleSubstituicao(event)" class="space-y-4">
+                        <form id="form-substituicao" onsubmit="handleSubstituicao(event)" class="space-y-5">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Data (Domingo Escalado)</label>
-                                <select id="sub-data" required onchange="updateAbsentPerson()" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-presb-gold">
-                                    <option value="">Selecione a data...</option>
-                                    <!-- Preenchido via JS -->
-                                </select>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Domingo Afetado</label>
+                                <select id="sub-data" required onchange="updateAbsentPerson()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-presb-gold/50 font-medium"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Função Afetada</label>
-                                <select id="sub-funcao" required onchange="updateAbsentPerson()" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-presb-gold">
-                                    <option value="">Selecione a função...</option>
-                                    <!-- Preenchido via JS -->
-                                </select>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Função</label>
+                                <select id="sub-funcao" required onchange="updateAbsentPerson()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-presb-gold/50 font-medium"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Turno da Substituição</label>
-                                <select id="sub-turno" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-presb-gold">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Turno</label>
+                                <select id="sub-turno" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-presb-gold/50 font-medium">
                                     <option value="Ambos">Ambos (Manhã e Noite)</option>
                                     <option value="Manhã">Apenas Manhã</option>
                                     <option value="Noite">Apenas Noite</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Quem Faltou? (Automático)</label>
-                                <input type="text" id="sub-ausente" readonly placeholder="Selecione data e função acima..." class="w-full border border-slate-200 bg-slate-50 text-slate-500 rounded-lg px-3 py-2 outline-none font-medium cursor-not-allowed">
+                            <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                                <label class="block text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">Ausente (Automático)</label>
+                                <input type="text" id="sub-ausente" readonly placeholder="Selecione data e função..." class="w-full bg-transparent text-red-800 font-bold outline-none cursor-not-allowed text-sm">
+                            </div>
+                            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <label class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Substituto (+)</label>
+                                <select id="sub-substituto" required class="w-full bg-transparent text-emerald-800 font-bold outline-none cursor-pointer text-sm"></select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Quem Substituiu? (Extra)</label>
-                                <select id="sub-substituto" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-presb-gold">
-                                    <option value="">Selecione quem cobriu...</option>
-                                    <!-- Preenchido via JS -->
-                                </select>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Observação</label>
+                                <textarea id="sub-obs" rows="2" placeholder="Motivo..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-presb-gold/50 resize-none font-medium"></textarea>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Observação / Motivo</label>
-                                <textarea id="sub-obs" rows="2" placeholder="Ex: Viagem, saúde..." class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-presb-gold resize-none"></textarea>
-                            </div>
-                            <button type="submit" id="btn-salvar-sub" class="w-full bg-presb-green hover:bg-green-900 text-white px-4 py-3 rounded-lg font-medium transition-colors mt-2 shadow-md">
-                                Salvar Registro
+                            <button type="submit" id="btn-salvar-sub" class="w-full bg-presb-green hover:bg-black text-white px-4 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-colors mt-2 shadow-lg active:scale-95">
+                                Gravar Registro
                             </button>
                         </form>
                     </div>
 
-                    <!-- Histórico -->
-                    <div class="bg-white rounded-xl shadow-lg border border-slate-200 lg:col-span-2 overflow-hidden flex flex-col">
-                        <div class="p-4 border-b border-slate-200 bg-slate-50">
-                            <h3 class="font-serif font-bold text-presb-green">Histórico Recente</h3>
+                    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 lg:col-span-2 overflow-hidden flex flex-col">
+                        <div class="p-6 border-b border-slate-100 bg-slate-50">
+                            <h3 class="font-serif font-bold text-presb-green">Histórico de Movimentações</h3>
                         </div>
-                        <div class="overflow-x-auto flex-1 p-0">
-                            <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left whitespace-nowrap">
                                 <thead>
-                                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                                        <th class="p-4 font-medium">Data</th>
-                                        <th class="p-4 font-medium">Função</th>
-                                        <th class="p-4 font-medium">Turno</th>
-                                        <th class="p-4 font-medium text-red-600">Faltou (-)</th>
-                                        <th class="p-4 font-medium text-green-600">Substituiu (+)</th>
-                                        <th class="p-4 font-medium">Observação</th>
-                                        <th class="p-4 font-medium"></th>
+                                    <tr class="bg-white text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200">
+                                        <th class="p-5">Data / Turno</th>
+                                        <th class="p-5">Área / Função</th>
+                                        <th class="p-5 text-red-500">Faltou</th>
+                                        <th class="p-5 text-emerald-600">Substituiu</th>
+                                        <th class="p-5 text-center"><i class="ph-bold ph-gear"></i></th>
                                     </tr>
                                 </thead>
-                                <tbody id="substituicoes-table-body" class="text-sm divide-y divide-slate-100">
-                                    <!-- Preenchido via JS -->
-                                </tbody>
+                                <tbody id="substituicoes-table-body" class="text-xs divide-y divide-slate-50 font-medium text-slate-700"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SEÇÃO: ESTATÍSTICAS -->
+            <!-- ESTATÍSTICAS -->
             <section id="sec-estatisticas" class="tab-content hidden animate-fade-in">
-                <div class="mb-6 border-b border-slate-200 pb-4">
-                    <h2 class="text-3xl font-bold text-presb-green font-serif">Desempenho e Participação</h2>
-                    <p class="text-slate-500 text-sm mt-1">Acompanhe o engajamento de cada integrante no ano.</p>
+                <div class="mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Relatório de Engajamento</h2>
+                    <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic">Participação anual da equipe.</p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left">
                             <thead>
-                                <tr class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider border-b-2 border-slate-300">
-                                    <th class="p-4 font-medium">Integrante</th>
-                                    <th class="p-4 font-medium text-center">Previsto (Escala)</th>
-                                    <th class="p-4 font-medium text-center text-red-600">Faltas</th>
-                                    <th class="p-4 font-medium text-center text-green-600">Extras (Subs.)</th>
-                                    <th class="p-4 font-medium text-center">Total Realizado</th>
-                                    <th class="p-4 font-medium text-right">Percentual (%)</th>
+                                <tr class="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200">
+                                    <th class="p-5">Integrante</th>
+                                    <th class="p-5 text-center">Escalado</th>
+                                    <th class="p-5 text-center text-red-500">Faltas</th>
+                                    <th class="p-5 text-center text-emerald-600">Substituiu</th>
+                                    <th class="p-5 text-center text-presb-green">Total Real</th>
+                                    <th class="p-5 text-right">Percentual</th>
                                 </tr>
                             </thead>
-                            <tbody id="estatisticas-table-body" class="text-sm divide-y divide-slate-100">
-                                <!-- Preenchido via JS -->
-                            </tbody>
+                            <tbody id="estatisticas-table-body" class="text-sm divide-y divide-slate-50"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- SEÇÃO: CADASTRO -->
+            <!-- CADASTRO -->
             <section id="sec-cadastro" class="tab-content hidden animate-fade-in">
-                <div class="mb-6 border-b border-slate-200 pb-4">
-                    <h2 class="text-3xl font-bold text-presb-green font-serif">Cadastro de Integrantes</h2>
-                    <p class="text-slate-500 text-sm mt-1">Gerencie a equipe por áreas e funções.</p>
+                <div class="mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Equipe IPCVT</h2>
+                    <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic">Gerenciamento de Integrantes e Funções.</p>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 mb-8 max-w-3xl">
-                    <form id="form-cadastro" onsubmit="handleAddMember(event)" class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 mb-10 max-w-4xl">
+                    <form id="form-cadastro" onsubmit="handleAddMember(event)" class="flex flex-col md:flex-row gap-5 items-end">
                         <div class="w-full md:w-1/3">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Função / Área</label>
-                            <select id="cad-funcao" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-presb-gold bg-white">
-                                <!-- Preenchido via JS -->
-                            </select>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Selecione a Função</label>
+                            <select id="cad-funcao" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-presb-gold/50 font-medium"></select>
                         </div>
                         <div class="w-full md:w-2/3">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Nome do Integrante</label>
-                            <input type="text" id="cad-nome" required placeholder="Ex: João da Silva" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-presb-gold">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nome Completo</label>
+                            <input type="text" id="cad-nome" required placeholder="Ex: João da Silva" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-presb-gold/50 font-bold text-slate-700">
                         </div>
-                        <button type="submit" class="w-full md:w-auto bg-green-700 hover:bg-green-800 text-white px-8 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap shadow-md">
-                            Adicionar
+                        <button type="submit" class="w-full md:w-auto bg-presb-green hover:bg-black text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-colors whitespace-nowrap shadow-lg active:scale-95">
+                            Cadastrar
                         </button>
                     </form>
                 </div>
 
-                <div id="cadastro-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Cards de áreas preenchidos via JS -->
-                </div>
+                <div id="cadastro-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
             </section>
 
         </main>
-    </div> <!-- Fim App Layout -->
+    </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO GENÉRICO -->
-    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300" id="confirm-content">
-            <div class="p-6 text-center">
-                <i class="ph-fill ph-warning-circle text-5xl text-red-500 mb-4 inline-block"></i>
-                <h3 class="text-xl font-bold text-slate-800 mb-2" id="confirm-title">Confirmar</h3>
-                <p class="text-slate-500 text-sm mb-6" id="confirm-message">Você tem certeza?</p>
-                <div class="flex gap-3">
-                    <button onclick="closeConfirmModal(false)" class="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
-                    <button onclick="closeConfirmModal(true)" class="flex-1 px-4 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-colors">Sim, Excluir</button>
+    <!-- MODAL DE SENHA (AUTH) -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in border-t-8 border-presb-gold">
+            <div class="p-8 text-center relative">
+                <button onclick="closeAuthModal()" class="absolute top-6 right-6 text-slate-300 hover:text-slate-600 transition-colors">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+                <div class="w-20 h-20 bg-presb-gold/20 text-presb-gold rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <i class="ph-fill ph-lock-key text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800 mb-2 font-serif tracking-tight">Acesso Restrito</h3>
+                <p class="text-slate-400 text-[10px] uppercase tracking-widest font-bold mb-8">Digite a senha administrativa</p>
+                
+                <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                    <input type="password" id="auth-password" placeholder="••••••" required 
+                           class="w-full border-2 border-slate-100 bg-slate-50 rounded-2xl px-4 py-4 outline-none focus:ring-4 focus:ring-presb-gold/20 focus:border-presb-gold text-center text-2xl tracking-[0.5em] font-black shadow-inner">
+                    <p id="auth-error" class="text-red-500 text-[10px] font-bold uppercase hidden animate-pulse pt-2">Senha incorreta</p>
+                    <button type="submit" class="w-full bg-presb-green hover:bg-black text-white font-black py-4 rounded-2xl shadow-xl transition-all uppercase tracking-[0.2em] text-[10px] mt-4">
+                        Desbloquear
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border-t-8 border-red-600" id="confirm-content">
+            <div class="p-8 text-center">
+                <i class="ph-fill ph-warning-octagon text-6xl text-red-500 mb-6 inline-block"></i>
+                <h3 class="text-2xl font-black text-slate-800 mb-2 font-serif" id="confirm-title">Confirmar</h3>
+                <p class="text-slate-500 text-sm mb-8 font-medium leading-relaxed" id="confirm-message">Você tem certeza?</p>
+                <div class="flex gap-4">
+                    <button onclick="closeConfirmModal(false)" class="flex-1 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button onclick="closeConfirmModal(true)" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg">Sim, Excluir</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-presb-green border border-presb-gold text-white px-5 py-4 rounded-lg shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
-        <i class="ph ph-check-circle text-presb-gold text-2xl" id="toast-icon"></i>
-        <span id="toast-message" class="text-sm font-medium tracking-wide">Sucesso!</span>
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-presb-green border-2 border-presb-gold text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-32 opacity-0 transition-all duration-500 z-[110]">
+        <i class="ph-fill ph-check-circle text-presb-gold text-2xl" id="toast-icon"></i>
+        <span id="toast-message" class="text-[10px] font-bold uppercase tracking-widest">Sucesso</span>
     </div>
 
-    <script>
-        // CONFIGURAÇÕES DE LOGIN
-        const APP_PASSWORD = "123";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const pass = document.getElementById('login-password').value;
-            const errorMsg = document.getElementById('login-error');
-            const loginScreen = document.getElementById('login-screen');
-            const loginCard = document.getElementById('login-card');
-            
-            if (pass === APP_PASSWORD) {
-                errorMsg.classList.add('hidden');
-                sessionStorage.setItem('isLoggedIn', 'true');
-                
-                // Animação de saída
-                loginCard.classList.remove('scale-100');
-                loginCard.classList.add('scale-95');
-                loginScreen.classList.remove('opacity-100');
-                loginScreen.classList.add('opacity-0');
-                
-                setTimeout(() => {
-                    loginScreen.classList.add('hidden');
-                    startApp();
-                }, 400);
-            } else {
-                errorMsg.classList.remove('hidden');
-                // Shake effect
-                loginCard.classList.add('translate-x-2');
-                setTimeout(() => loginCard.classList.remove('translate-x-2'), 100);
-                setTimeout(() => loginCard.classList.add('-translate-x-2'), 200);
-                setTimeout(() => loginCard.classList.remove('-translate-x-2'), 300);
-            }
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyAg9w5QohkcmXUFRgLfSI5Sh1chnCD1Owc",
+            authDomain: "repertorio-ipcvt.firebaseapp.com",
+            projectId: "repertorio-ipcvt",
+            storageBucket: "repertorio-ipcvt.firebasestorage.app",
+            messagingSenderId: "774659782213",
+            appId: "1:774659782213:web:5e9cbf88fec30eb382152c",
+            measurementId: "G-DJ8E3VPMSY"
+        };
 
-        function logout() {
-            sessionStorage.removeItem('isLoggedIn');
-            location.reload(); // Recarrega a página voltando para a tela de login
-        }
-
-        function startApp() {
-            const appLayout = document.getElementById('app-layout');
-            appLayout.classList.remove('hidden');
-            appLayout.classList.add('flex');
-            
-            // Animação de entrada
-            setTimeout(() => {
-                appLayout.classList.remove('opacity-0');
-                appLayout.classList.add('opacity-100');
-            }, 50);
-
-            initData();
-            switchTab('escalas');
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // ==========================================
-        // LÓGICA DO SISTEMA
+        // VARIÁVEIS GLOBAIS
         // ==========================================
-
         const CURRENT_YEAR = 2026;
+        const APP_PASSWORD = "123";
+        let isFirebaseConnected = false;
+        let activeTab = 'escalas';
+        
+        // Estado de Autenticação para Edição
+        let isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+        let pendingAction = null; // 'edit_escala' ou 'switch_tab'
+        let pendingTab = null;
 
         const COLUMNS_ORDER = [
             "Seleção de Repertório", "Soprano", "Contralto", "Tenor", 
@@ -418,34 +349,79 @@
             "TRANSMISSÃO", "OP. CÂMERA", "FOTOGRAFIA", "Op. Som", "Projeção"
         ];
 
-        // Mapeamento de funções para os seus respectivos departamentos
         const DEPARTMENTS = {
-            "Seleção de Repertório": "Louvor",
-            "Soprano": "Louvor", "Contralto": "Louvor", "Tenor": "Louvor",
-            "Violão": "Louvor", "Guitarra": "Louvor", "Baixo": "Louvor",
-            "Bateria": "Louvor", "Piano": "Louvor", "Violino": "Louvor",
+            "Seleção de Repertório": "Louvor", "Soprano": "Louvor", "Contralto": "Louvor", "Tenor": "Louvor",
+            "Violão": "Louvor", "Guitarra": "Louvor", "Baixo": "Louvor", "Bateria": "Louvor", "Piano": "Louvor", "Violino": "Louvor",
             "TRANSMISSÃO": "Mídia", "OP. CÂMERA": "Mídia", "FOTOGRAFIA": "Mídia",
             "Op. Som": "Técnica", "Projeção": "Técnica"
         };
 
         const DEPT_COLORS = {
-            "Louvor": { header: "bg-emerald-100 text-emerald-900 border-emerald-200", cellAlt1: "bg-emerald-50/40", cellAlt2: "bg-emerald-100/30", border: "border-emerald-100" },
-            "Mídia": { header: "bg-blue-100 text-blue-900 border-blue-200", cellAlt1: "bg-blue-50/40", cellAlt2: "bg-blue-100/30", border: "border-blue-100" },
-            "Técnica": { header: "bg-amber-100 text-amber-900 border-amber-200", cellAlt1: "bg-amber-50/40", cellAlt2: "bg-amber-100/30", border: "border-amber-100" }
+            "Louvor": { header: "bg-emerald-50 text-emerald-900 border-emerald-100", cellAlt1: "bg-emerald-50/30", cellAlt2: "bg-emerald-50/60", border: "border-emerald-100" },
+            "Mídia": { header: "bg-blue-50 text-blue-900 border-blue-100", cellAlt1: "bg-blue-50/30", cellAlt2: "bg-blue-50/60", border: "border-blue-100" },
+            "Técnica": { header: "bg-amber-50 text-amber-900 border-amber-100", cellAlt1: "bg-amber-50/30", cellAlt2: "bg-amber-50/60", border: "border-amber-100" }
         };
 
-        function formatName(name) {
-            const exceptions = ['da', 'de', 'do', 'das', 'dos'];
-            return name.toLowerCase().split(' ').map((word, index) => {
-                if (index > 0 && exceptions.includes(word)) {
-                    return word;
-                }
-                return word.charAt(0).toUpperCase() + word.slice(1);
-            }).join(' ');
+        let appState = { members: {}, schedules: [], substitutions: [] };
+
+        // ==========================================
+        // INICIALIZAÇÃO E FIREBASE
+        // ==========================================
+        async function startApp() {
+            try { await signInAnonymously(auth); } catch (err) { console.warn("Modo offline ativo", err); }
+            initFirebaseConnection();
+            updateAuthUI();
         }
 
-        let appState = {
-            members: {
+        function initFirebaseConnection() {
+            const docRef = doc(db, "app_ipcvt", "escala_geral_dados");
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    appState = docSnap.data();
+                    if (!isFirebaseConnected) {
+                        isFirebaseConnected = true;
+                        document.getElementById('loading-data').classList.add('hidden');
+                        proceedSwitchTab('escalas'); 
+                    } else {
+                        refreshCurrentTab();
+                    }
+                } else {
+                    generateDefaultData();
+                    saveStateToFirebase().then(() => {
+                        isFirebaseConnected = true;
+                        document.getElementById('loading-data').classList.add('hidden');
+                        proceedSwitchTab('escalas');
+                    });
+                }
+            }, (error) => {
+                showToast("Erro ao conectar com a nuvem.", true);
+                document.getElementById('loading-data').classList.add('hidden');
+            });
+        }
+
+        async function saveStateToFirebase() {
+            try {
+                await setDoc(doc(db, "app_ipcvt", "escala_geral_dados"), appState);
+            } catch (error) { showToast("Erro ao salvar!", true); }
+        }
+
+        function generateDefaultData() {
+            const sundays = [];
+            let date = new Date(CURRENT_YEAR, 0, 1);
+            while (date.getDay() !== 0) date.setDate(date.getDate() + 1);
+
+            let currentMonth = date.getMonth(), weekOfMonth = 1;
+
+            while (date.getFullYear() === CURRENT_YEAR) {
+                if (date.getMonth() !== currentMonth) { currentMonth = date.getMonth(); weekOfMonth = 1; }
+                const dateStr = date.toLocaleDateString('en-CA'); 
+                sundays.push({ date: dateStr, dom: `${weekOfMonth}º`, assignments: {} });
+                date.setDate(date.getDate() + 7);
+                weekOfMonth++;
+            }
+            appState.schedules = sundays;
+            appState.substitutions = [];
+            appState.members = {
                 "Soprano": ["Jamylle", "Laura", "Mônica", "Arlete"],
                 "Contralto": ["Liliane", "Daiane", "Roberta", "Amanda"],
                 "Tenor": ["Hudson", "Pastor", "João Victor", "Jean Lucas"],
@@ -453,157 +429,130 @@
                 "Guitarra": ["Allysson", "Germano", "Nilson"],
                 "Baixo": ["Lorran", "João Victor", "Angelo"],
                 "Bateria": ["Jean Lucas", "Flávio", "Pedro"],
-                "Piano": ["Hudson"],
-                "Violino": ["Isadora"],
+                "Piano": ["Hudson"], "Violino": ["Isadora"],
                 "TRANSMISSÃO": ["Erick", "Lucas", "Kauã", "Samuel"],
                 "OP. CÂMERA": ["Lucas", "Manuella", "Mariana"],
                 "FOTOGRAFIA": ["Mariana", "Arlete", "Manuela", "Gabi", "Victor"],
-                "Op. Som": [],
-                "Projeção": [],
+                "Op. Som": [], "Projeção": [],
                 "Seleção de Repertório": ["João Victor", "Liliane"]
-            },
-            schedules: [], 
-            substitutions: []
-        };
+            };
+        }
 
-        function generateSundays(year) {
-            const sundays = [];
-            let date = new Date(year, 0, 1);
-            while (date.getDay() !== 0) date.setDate(date.getDate() + 1);
-
-            let currentMonth = date.getMonth();
-            let weekOfMonth = 1;
-
-            while (date.getFullYear() === year) {
-                if (date.getMonth() !== currentMonth) {
-                    currentMonth = date.getMonth();
-                    weekOfMonth = 1;
-                }
-                const dateStr = date.toLocaleDateString('en-CA'); 
-                sundays.push({ date: dateStr, dom: `${weekOfMonth}º`, assignments: {} });
-                date.setDate(date.getDate() + 7);
-                weekOfMonth++;
+        // ==========================================
+        // AUTENTICAÇÃO E NAVEGAÇÃO
+        // ==========================================
+        function requestAuth(action, target = null) {
+            if (isAdmin) {
+                if (action === 'edit_escala') return; // Já é admin
+                if (action === 'switch_tab') proceedSwitchTab(target);
+                return;
             }
-            return sundays;
+            pendingAction = action;
+            pendingTab = target;
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-error').classList.add('hidden');
+            setTimeout(() => document.getElementById('auth-password').focus(), 100);
         }
 
-        function initData() {
-            appState.schedules = generateSundays(CURRENT_YEAR);
-            const demoData = [
-                { date: "2026-01-04", assignments: {"Seleção de Repertório": "João Victor", "Soprano": "Jamylle", "Contralto": "Liliane", "Tenor": "Hudson", "Violão": "Guilherme", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Jean Lucas", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Erick", "OP. CÂMERA": "Lucas", "FOTOGRAFIA": "Mariana"} },
-                { date: "2026-01-11", assignments: {"Seleção de Repertório": "Liliane", "Soprano": "Laura", "Contralto": "Daiane", "Tenor": "Pastor", "Violão": "Pastor", "Guitarra": "Germano", "Baixo": "João Victor", "Bateria": "Flávio", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Erick", "OP. CÂMERA": "Manuella", "FOTOGRAFIA": "Arlete"} },
-                { date: "2026-01-18", assignments: {"Seleção de Repertório": "João Victor", "Soprano": "Mônica", "Contralto": "Roberta", "Tenor": "João Victor", "Violão": "Alexandre", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Pedro", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Lucas", "OP. CÂMERA": "Mariana", "FOTOGRAFIA": "Manuela"} },
-                { date: "2026-01-25", assignments: {"Seleção de Repertório": "Liliane", "Soprano": "Arlete", "Contralto": "Amanda", "Tenor": "Pastor", "Violão": "Pastor", "Guitarra": "Nilson", "Baixo": "João Victor", "Bateria": "Flávio", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Kauã", "OP. CÂMERA": "Lucas", "FOTOGRAFIA": "Gabi"} },
-                { date: "2026-02-01", assignments: {"Seleção de Repertório": "João Victor", "Soprano": "Jamylle", "Contralto": "Liliane", "Tenor": "Hudson", "Violão": "Guilherme", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Jean Lucas", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Samuel"} },
-                { date: "2026-10-11", assignments: {"Seleção de Repertório": "João Victor", "Soprano": "Laura", "Contralto": "Roberta", "Tenor": "Pastor", "Violão": "Pastor", "Guitarra": "Germano", "Baixo": "João Victor", "Bateria": "Flávio", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Samuel", "OP. CÂMERA": "Lucas", "FOTOGRAFIA": "Manuela"} },
-                { date: "2026-10-18", assignments: {"Seleção de Repertório": "Liliane", "Soprano": "Mônica", "Contralto": "Daiane", "Tenor": "Hudson", "Violão": "Alexandre", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Pedro", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Lucas", "OP. CÂMERA": "Manuella", "FOTOGRAFIA": "Arlete"} },
-                { date: "2026-10-25", assignments: {"Seleção de Repertório": "João Victor", "Soprano": "Arlete", "Contralto": "Amanda", "Tenor": "Jean Lucas", "Violão": "Jean Lucas", "Guitarra": "Nilson", "Baixo": "Angelo", "Bateria": "Flávio", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Erick", "OP. CÂMERA": "Lucas", "FOTOGRAFIA": "Victor"} },
-                { date: "2026-11-01", assignments: {"Seleção de Repertório": "Liliane", "Soprano": "Jamylle", "Contralto": "Liliane", "Tenor": "Hudson", "Violão": "Guilherme", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Jean Lucas", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Kauã", "OP. CÂMERA": "Lucas", "FOTOGRAFIA": "Gabi"} },
-                { date: "2026-11-08", assignments: {"Seleção de Repertório": "João Victor", "Soprano": "Laura", "Contralto": "Roberta", "Tenor": "Pastor", "Violão": "Pastor", "Guitarra": "Germano", "Baixo": "João Victor", "Bateria": "Flávio", "Piano": "Hudson", "Violino": "Isadora", "TRANSMISSÃO": "Lucas", "OP. CÂMERA": "Lucas", "FOTOGRAFIA": "Manuela"} }
-            ];
-
-            demoData.forEach(demo => {
-                let schedule = appState.schedules.find(s => s.date === demo.date);
-                if (schedule) schedule.assignments = demo.assignments;
-            });
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            pendingAction = null; pendingTab = null;
         }
 
-        function getUniqueMembers() {
-            const all = new Set();
-            for (let role in appState.members) {
-                appState.members[role].forEach(m => all.add(m));
-            }
-            return Array.from(all).sort();
-        }
-
-        function formatDateBR(dateString) {
-            if(!dateString) return "";
-            const [y, m, d] = dateString.split('-');
-            return `${d}/${m}/${y}`;
-        }
-
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            
-            if (isError) {
-                toast.classList.remove('bg-presb-green', 'border-presb-gold');
-                toast.classList.add('bg-red-600', 'border-red-400');
-                icon.className = 'ph ph-warning-circle text-white text-2xl';
-                icon.classList.remove('text-presb-gold');
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const pass = document.getElementById('auth-password').value;
+            if (pass === APP_PASSWORD) {
+                isAdmin = true;
+                sessionStorage.setItem('isAdmin', 'true');
+                closeAuthModal();
+                updateAuthUI();
+                
+                if (pendingAction === 'switch_tab') proceedSwitchTab(pendingTab);
+                else if (pendingAction === 'edit_escala') renderEscalas();
+                showToast("Acesso Liberado");
             } else {
-                toast.classList.add('bg-presb-green', 'border-presb-gold');
-                toast.classList.remove('bg-red-600', 'border-red-400');
-                icon.className = 'ph ph-check-circle text-presb-gold text-2xl';
+                const err = document.getElementById('auth-error');
+                err.classList.remove('hidden');
             }
-
-            document.getElementById('toast-message').innerText = message;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
         }
 
-        // ==========================================
-        // MODAL DE CONFIRMAÇÃO
-        // ==========================================
-        let confirmActionCallback = null;
-
-        function openConfirmModal(title, message, callback) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-message').innerText = message;
-            confirmActionCallback = callback;
-
-            const modal = document.getElementById('confirm-modal');
-            const content = document.getElementById('confirm-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-            }, 10);
+        function logoutAdmin() {
+            isAdmin = false;
+            sessionStorage.removeItem('isAdmin');
+            updateAuthUI();
+            if (activeTab !== 'escalas') proceedSwitchTab('escalas');
+            else renderEscalas();
+            showToast("Edição bloqueada.");
         }
 
-        function closeConfirmModal(confirmed) {
-            const modal = document.getElementById('confirm-modal');
-            const content = document.getElementById('confirm-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                if(confirmed && confirmActionCallback) confirmActionCallback();
-                confirmActionCallback = null;
-            }, 300);
+        function updateAuthUI() {
+            const btnEdit = document.getElementById('btn-toggle-edit');
+            const logoutContainer = document.getElementById('admin-logout-container');
+            const subtitle = document.getElementById('escala-subtitle');
+            
+            ['lock-substituicoes', 'lock-estatisticas', 'lock-cadastro'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { isAdmin ? el.classList.add('hidden') : el.classList.remove('hidden'); }
+            });
+
+            if (isAdmin) {
+                btnEdit.classList.add('hidden');
+                logoutContainer.classList.remove('hidden');
+                subtitle.innerText = "Modo EDIÇÃO ativado. Mudanças são salvas automaticamente.";
+                subtitle.classList.replace('text-slate-500', 'text-presb-gold');
+            } else {
+                btnEdit.classList.remove('hidden');
+                logoutContainer.classList.add('hidden');
+                subtitle.innerText = "Modo de visualização ativado. Apenas leitura.";
+                subtitle.classList.replace('text-presb-gold', 'text-slate-500');
+            }
         }
 
-        // --- NAVEGAÇÃO DE ABAS ---
-        function switchTab(tabId) {
+        function attemptSwitchTab(tabId) {
+            if (tabId !== 'escalas' && !isAdmin) {
+                requestAuth('switch_tab', tabId);
+            } else {
+                proceedSwitchTab(tabId);
+            }
+        }
+
+        function proceedSwitchTab(tabId) {
+            activeTab = tabId;
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-white/10', 'text-white', 'border-presb-gold');
-                btn.classList.add('text-slate-400', 'border-transparent');
+                btn.classList.remove('bg-white/5', 'text-white', 'border-presb-gold');
+                btn.classList.add('text-white/50', 'border-transparent');
             });
 
             document.getElementById(`sec-${tabId}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-${tabId}`);
-            activeBtn.classList.remove('text-slate-400', 'border-transparent');
-            activeBtn.classList.add('bg-white/10', 'text-white', 'border-presb-gold');
+            activeBtn.classList.remove('text-white/50', 'border-transparent');
+            activeBtn.classList.add('bg-white/5', 'text-white', 'border-presb-gold');
 
-            if(tabId === 'escalas') renderEscalas();
-            if(tabId === 'substituicoes') renderSubstituicoes();
-            if(tabId === 'estatisticas') renderEstatisticas();
-            if(tabId === 'cadastro') renderCadastro();
+            refreshCurrentTab();
         }
 
-        // --- RENDERIZAÇÃO: ESCALAS ---
+        function refreshCurrentTab() {
+            if(activeTab === 'escalas') renderEscalas();
+            if(activeTab === 'substituicoes') renderSubstituicoes();
+            if(activeTab === 'estatisticas') renderEstatisticas();
+            if(activeTab === 'cadastro') renderCadastro();
+        }
+
+        // ==========================================
+        // RENDERIZAÇÃO: ESCALAS
+        // ==========================================
         function renderEscalas() {
             const thead = document.getElementById('escala-table-head');
-            let thHTML = `<tr class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider border-b-2 border-slate-300">
-                            <th class="p-4 font-bold sticky left-0 bg-slate-100 z-20 w-28 border-r border-slate-200">Data</th>
-                            <th class="p-4 font-bold sticky left-28 bg-slate-100 z-20 w-16 border-r border-slate-200 text-center">Dom</th>`;
+            let thHTML = `<tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-widest border-b-2 border-slate-200">
+                            <th class="p-4 font-black sticky left-0 bg-slate-50 z-20 w-28 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Data</th>
+                            <th class="p-4 font-black sticky left-28 bg-slate-50 z-20 w-16 border-r border-slate-200 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Dom</th>`;
             COLUMNS_ORDER.forEach(col => {
                 const dept = DEPARTMENTS[col];
                 const headerColor = DEPT_COLORS[dept].header;
-                thHTML += `<th class="p-4 font-bold min-w-[160px] border-r border-b-2 ${headerColor}">${col}</th>`;
+                thHTML += `<th class="p-4 font-black min-w-[160px] border-r border-b-2 ${headerColor}">${col}</th>`;
             });
             thHTML += `</tr>`;
             thead.innerHTML = thHTML;
@@ -613,13 +562,10 @@
 
             const selectedMonth = document.getElementById('filtro-mes')?.value;
             let filteredSchedules = appState.schedules;
-            
-            if (selectedMonth) {
-                filteredSchedules = appState.schedules.filter(s => s.date.split('-')[1] === selectedMonth);
-            }
+            if (selectedMonth) filteredSchedules = appState.schedules.filter(s => s.date.split('-')[1] === selectedMonth);
 
             if(filteredSchedules.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${COLUMNS_ORDER.length + 2}" class="p-8 text-center text-slate-500 italic">Nenhum domingo encontrado para o filtro selecionado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${COLUMNS_ORDER.length + 2}" class="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum domingo encontrado</td></tr>`;
                 return;
             }
 
@@ -628,9 +574,9 @@
                 tr.className = index % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50 hover:bg-slate-100';
                 
                 let rowHTML = `
-                    <td class="p-3 font-medium sticky left-0 z-10 border-r border-slate-200 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">${formatDateBR(esc.date)}</td>
-                    <td class="p-3 sticky left-28 z-10 border-r border-slate-200 text-center ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
-                        <span class="bg-presb-green/10 text-presb-green text-xs px-2 py-1 rounded font-bold">${esc.dom}</span>
+                    <td class="p-4 font-bold sticky left-0 z-10 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} text-slate-700">${formatDateBR(esc.date)}</td>
+                    <td class="p-3 sticky left-28 z-10 border-r border-slate-200 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
+                        <span class="bg-presb-green/10 text-presb-green text-[10px] px-2.5 py-1.5 rounded-lg font-black">${esc.dom}</span>
                     </td>
                 `;
 
@@ -647,34 +593,43 @@
                     const dept = DEPARTMENTS[role];
                     const bgCellClass = index % 2 === 0 ? DEPT_COLORS[dept].cellAlt1 : DEPT_COLORS[dept].cellAlt2;
                     const borderColor = DEPT_COLORS[dept].border;
-                    
-                    let options = `<option value="">- Livre -</option>`;
-                    appState.members[role].sort().forEach(m => {
-                        const selected = m === currentPerson ? 'selected' : '';
-                        options += `<option value="${m}" ${selected}>${m}</option>`;
-                    });
-
-                    let selectClass = 'select-inline text-slate-400';
-                    let tooltip = '';
-                    
-                    if (currentPerson) {
-                        if (personDepts[currentPerson].size > 1) {
-                            selectClass = 'select-inline duplicated';
-                            tooltip = 'title="Atenção: Integrante escalado em múltiplos departamentos neste dia!"';
-                        } else {
-                            selectClass = 'select-inline filled';
-                        }
-                    }
-
                     const roleId = role.replace(/\s+/g, '-').replace(/\./g, '');
                     
-                    rowHTML += `
-                        <td class="p-2 border-r ${borderColor} last:border-none ${bgCellClass}">
-                            <select id="sel-${esc.date}-${roleId}" onchange="updateAssignment('${esc.date}', '${role}', this.value)" class="${selectClass}" ${tooltip}>
-                                ${options}
-                            </select>
-                        </td>
-                    `;
+                    let cellContent = '';
+
+                    if (isAdmin) {
+                        let options = `<option value="">- Livre -</option>`;
+                        if(appState.members[role]) {
+                            appState.members[role].sort().forEach(m => {
+                                const selected = m === currentPerson ? 'selected' : '';
+                                options += `<option value="${m}" ${selected}>${m}</option>`;
+                            });
+                        }
+                        
+                        let selectClass = 'select-inline text-slate-400 text-xs font-medium';
+                        let tooltip = '';
+                        if (currentPerson) {
+                            if (personDepts[currentPerson] && personDepts[currentPerson].size > 1) {
+                                selectClass = 'select-inline duplicated text-xs';
+                                tooltip = 'title="Atenção: Escalado em múltiplos departamentos!"';
+                            } else {
+                                selectClass = 'select-inline filled text-xs';
+                            }
+                        }
+
+                        cellContent = `<select id="sel-${esc.date}-${roleId}" onchange="updateAssignment('${esc.date}', '${role}', this.value)" class="${selectClass}" ${tooltip}>${options}</select>`;
+                    } else {
+                        // Modo Leitura
+                        if (currentPerson) {
+                            const isDuplicated = personDepts[currentPerson] && personDepts[currentPerson].size > 1;
+                            const textClass = isDuplicated ? 'text-red-600 font-black' : 'text-presb-green font-bold';
+                            cellContent = `<span class="${textClass} text-xs px-2" ${isDuplicated ? 'title="Escalado em múltiplas funções!"' : ''}>${currentPerson}</span>`;
+                        } else {
+                            cellContent = `<span class="text-slate-300 text-xs italic px-2 font-medium">- Livre -</span>`;
+                        }
+                    }
+                    
+                    rowHTML += `<td class="p-2 border-r ${borderColor} last:border-none ${bgCellClass}">${cellContent}</td>`;
                 });
 
                 tr.innerHTML = rowHTML;
@@ -685,135 +640,63 @@
         function updateAssignment(dateStr, role, newValue) {
             const schedule = appState.schedules.find(s => s.date === dateStr);
             if(schedule) {
-                if(newValue) {
-                    schedule.assignments[role] = newValue;
-                } else {
-                    delete schedule.assignments[role];
-                }
-                refreshRowVisuals(dateStr);
+                newValue ? schedule.assignments[role] = newValue : delete schedule.assignments[role];
+                saveStateToFirebase();
+                renderEscalas(); // Re-renderiza para atualizar cores de duplicidade
             }
         }
 
-        function refreshRowVisuals(dateStr) {
-            const schedule = appState.schedules.find(s => s.date === dateStr);
-            if(!schedule) return;
-
-            const personDepts = {};
-            Object.entries(schedule.assignments).forEach(([role, name]) => {
-                if(name) {
-                    if(!personDepts[name]) personDepts[name] = new Set();
-                    personDepts[name].add(DEPARTMENTS[role] || "Outros");
-                }
-            });
-
-            COLUMNS_ORDER.forEach(role => {
-                const roleId = role.replace(/\s+/g, '-').replace(/\./g, '');
-                const selectEl = document.getElementById(`sel-${dateStr}-${roleId}`);
-                
-                if(selectEl) {
-                    const person = schedule.assignments[role];
-                    
-                    selectEl.classList.remove('filled', 'text-slate-400', 'duplicated');
-                    
-                    if(person) {
-                        if(personDepts[person].size > 1) {
-                            selectEl.classList.add('duplicated');
-                            selectEl.title = 'Atenção: Integrante escalado em múltiplos departamentos neste dia!';
-                        } else {
-                            selectEl.classList.add('filled');
-                            selectEl.removeAttribute('title');
-                        }
-                    } else {
-                        selectEl.classList.add('text-slate-400');
-                        selectEl.removeAttribute('title');
-                    }
-                }
-            });
+        // ==========================================
+        // UTILITÁRIOS E EXPORTAÇÃO PDF
+        // ==========================================
+        function getUniqueMembers() {
+            const all = new Set();
+            for (let role in appState.members) appState.members[role].forEach(m => all.add(m));
+            return Array.from(all).sort();
         }
 
-        // --- EXPORTAÇÃO PARA PDF ---
+        function formatDateBR(dateString) {
+            if(!dateString) return "";
+            const [y, m, d] = dateString.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
         function exportarPDF() {
             try {
-                // Recupera as classes do jsPDF
                 const { jsPDF } = window.jspdf;
-                // Criação do documento A4 formato Paisagem
                 const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
-                
                 const selectMes = document.getElementById('filtro-mes');
-                const mesNome = selectMes.options[selectMes.selectedIndex].text;
-                
-                // Obtém a tabela filtrada atual
                 const selectedMonthValue = selectMes.value;
-                let filteredSchedules = appState.schedules;
-                if (selectedMonthValue) {
-                    filteredSchedules = appState.schedules.filter(s => s.date.split('-')[1] === selectedMonthValue);
-                }
-
-                if (filteredSchedules.length === 0) {
-                    showToast("Nenhum dado para exportar neste mês.", true);
-                    return;
-                }
-
-                // Cabeçalho do PDF
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(16);
-                doc.setTextColor(27, 67, 50); // Verde presbiteriano
-                const title = `Escala de Louvor IPB - ${mesNome}`;
-                doc.text(title, 14, 20);
+                const mesNome = selectedMonthValue ? selectMes.options[selectMes.selectedIndex].text : "Ano Inteiro";
                 
-                doc.setFontSize(9);
-                doc.setTextColor(100, 100, 100);
-                doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 14, 26);
+                let filteredSchedules = appState.schedules;
+                if (selectedMonthValue) filteredSchedules = appState.schedules.filter(s => s.date.split('-')[1] === selectedMonthValue);
 
-                // Preparação dos Dados da Tabela
+                if (filteredSchedules.length === 0) { showToast("Nenhum dado para exportar.", true); return; }
+
+                doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(27, 67, 50);
+                doc.text(`Escala IPCVT - ${mesNome}`, 14, 20);
+                doc.setFontSize(9); doc.setTextColor(100, 100, 100);
+                doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 26);
+
                 const columns = ["Data", "Dom", ...COLUMNS_ORDER];
-                const rows = filteredSchedules.map(esc => {
-                    return [
-                        formatDateBR(esc.date),
-                        esc.dom,
-                        ...COLUMNS_ORDER.map(role => esc.assignments[role] || '-')
-                    ];
-                });
+                const rows = filteredSchedules.map(esc => [formatDateBR(esc.date), esc.dom, ...COLUMNS_ORDER.map(role => esc.assignments[role] || '-')]);
 
-                // Geração da Tabela no PDF
                 doc.autoTable({
-                    startY: 32,
-                    head: [columns],
-                    body: rows,
-                    theme: 'grid',
-                    styles: { 
-                        fontSize: 6, // Fonte pequena para caber todas as colunas
-                        cellPadding: 2, 
-                        overflow: 'linebreak',
-                        halign: 'center',
-                        valign: 'middle'
-                    },
-                    headStyles: { 
-                        fillColor: [27, 67, 50], 
-                        textColor: 255,
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: { 
-                        fillColor: [248, 250, 252] 
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 35 }, // Largura fixa para Data
-                        1: { cellWidth: 20 }, // Largura fixa para Dom
-                    }
+                    startY: 32, head: [columns], body: rows, theme: 'grid',
+                    styles: { fontSize: 6, cellPadding: 2, overflow: 'linebreak', halign: 'center', valign: 'middle' },
+                    headStyles: { fillColor: [27, 67, 50], textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [248, 250, 252] },
+                    columnStyles: { 0: { cellWidth: 35 }, 1: { cellWidth: 20 } }
                 });
-
-                // Download
-                const fileName = selectedMonthValue ? `Escala_Louvor_${mesNome}.pdf` : `Escala_Louvor_Completa.pdf`;
-                doc.save(fileName);
-                showToast("PDF gerado com sucesso!");
-
-            } catch (error) {
-                console.error("Erro ao gerar PDF:", error);
-                showToast("Erro ao gerar o PDF.", true);
-            }
+                doc.save(`Escala_IPCVT_${mesNome.replace(' ', '_')}.pdf`);
+                showToast("PDF gerado!");
+            } catch (error) { showToast("Erro ao gerar o PDF.", true); }
         }
 
-        // --- RENDERIZAÇÃO: SUBSTITUIÇÕES ---
+        // ==========================================
+        // SUBSTITUIÇÕES
+        // ==========================================
         function updateAbsentPerson() {
             const date = document.getElementById('sub-data').value;
             const role = document.getElementById('sub-funcao').value;
@@ -821,225 +704,150 @@
             const btnSalvar = document.getElementById('btn-salvar-sub');
             const turnoSelect = document.getElementById('sub-turno');
 
-            if(role && DEPARTMENTS[role] === "Mídia") {
-                turnoSelect.value = "Noite";
-            } else if(role) {
-                turnoSelect.value = "Ambos";
-            }
+            if(role && DEPARTMENTS[role] === "Mídia") turnoSelect.value = "Noite";
+            else if(role) turnoSelect.value = "Ambos";
 
             if(date && role) {
                 const schedule = appState.schedules.find(s => s.date === date);
                 if(schedule && schedule.assignments[role]) {
                     absentInput.value = schedule.assignments[role];
-                    absentInput.classList.remove('text-red-500');
-                    btnSalvar.disabled = false;
-                    btnSalvar.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnSalvar.disabled = false; btnSalvar.classList.remove('opacity-50', 'cursor-not-allowed');
                 } else {
-                    absentInput.value = "Ninguém escalado nesta data/função.";
-                    absentInput.classList.add('text-red-500');
-                    btnSalvar.disabled = true;
-                    btnSalvar.classList.add('opacity-50', 'cursor-not-allowed');
+                    absentInput.value = "Vazio na escala original";
+                    btnSalvar.disabled = true; btnSalvar.classList.add('opacity-50', 'cursor-not-allowed');
                 }
             } else {
                 absentInput.value = "";
-                btnSalvar.disabled = false;
-                btnSalvar.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnSalvar.disabled = false; btnSalvar.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
         function handleSubstituicao(e) {
             e.preventDefault();
-            const date = document.getElementById('sub-data').value;
-            const role = document.getElementById('sub-funcao').value;
-            const turno = document.getElementById('sub-turno').value;
-            const absent = document.getElementById('sub-ausente').value;
-            const substitute = document.getElementById('sub-substituto').value;
-            const obs = document.getElementById('sub-obs').value.trim();
-
-            if(!absent || absent.startsWith("Ninguém")) {
-                showToast("Selecione data e função com integrante escalado.", true);
-                return;
-            }
-
-            if(absent === substitute) {
-                showToast("A pessoa ausente e o substituto não podem ser a mesma pessoa!", true);
-                return;
-            }
-
-            appState.substitutions.push({
+            const payload = {
                 id: Date.now(),
-                date, role, turno, absent, substitute, obs
-            });
+                date: document.getElementById('sub-data').value,
+                role: document.getElementById('sub-funcao').value,
+                turno: document.getElementById('sub-turno').value,
+                absent: document.getElementById('sub-ausente').value,
+                substitute: document.getElementById('sub-substituto').value,
+                obs: document.getElementById('sub-obs').value.trim()
+            };
+            if(!payload.absent || payload.absent === "Vazio na escala original") return showToast("Selecione data com pessoa escalada.", true);
+            if(payload.absent === payload.substitute) return showToast("Pessoa não pode substituir ela mesma!", true);
 
+            if(!appState.substitutions) appState.substitutions = [];
+            appState.substitutions.push(payload);
             document.getElementById('form-substituicao').reset();
             updateAbsentPerson(); 
+            saveStateToFirebase();
             renderSubstituicoes();
-            showToast('Troca registrada com sucesso!');
+            showToast('Troca salva!');
         }
 
         function deleteSubstituicao(subId) {
-            openConfirmModal('Remover Registro', 'Deseja realmente remover este registro de substituição?', () => {
+            openConfirmModal('Remover Registro', 'Deseja realmente remover esta troca?', () => {
                 appState.substitutions = appState.substitutions.filter(s => String(s.id) !== String(subId));
-                renderSubstituicoes();
-                showToast('Registro removido.');
+                saveStateToFirebase(); renderSubstituicoes(); showToast('Removido.');
             });
         }
 
         function renderSubstituicoes() {
             const uniqueMembers = getUniqueMembers();
-
-            const dateSelect = document.getElementById('sub-data');
-            dateSelect.innerHTML = '<option value="">Selecione a data...</option>' + 
-                appState.schedules.map(s => `<option value="${s.date}">${formatDateBR(s.date)}</option>`).join('');
-
-            const roleSelect = document.getElementById('sub-funcao');
-            roleSelect.innerHTML = '<option value="">Selecione a função...</option>' + 
-                COLUMNS_ORDER.map(r => `<option value="${r}">${r}</option>`).join('');
-
-            const subSelect = document.getElementById('sub-substituto');
-            subSelect.innerHTML = '<option value="">Selecione a pessoa...</option>' + 
-                uniqueMembers.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('sub-data').innerHTML = '<option value="">Selecione a data...</option>' + appState.schedules.map(s => `<option value="${s.date}">${formatDateBR(s.date)}</option>`).join('');
+            document.getElementById('sub-funcao').innerHTML = '<option value="">Selecione a função...</option>' + COLUMNS_ORDER.map(r => `<option value="${r}">${r}</option>`).join('');
+            document.getElementById('sub-substituto').innerHTML = '<option value="">Selecione quem cobriu...</option>' + uniqueMembers.map(m => `<option value="${m}">${m}</option>`).join('');
 
             const tbody = document.getElementById('substituicoes-table-body');
-            tbody.innerHTML = '';
+            const subsArray = [...(appState.substitutions || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            const sortedSubs = [...appState.substitutions].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            if(sortedSubs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500 italic">Nenhuma substituição registrada.</td></tr>`;
+            if(subsArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum registro</td></tr>`;
                 return;
             }
 
-            sortedSubs.forEach(sub => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-4 font-medium">${formatDateBR(sub.date)}</td>
-                        <td class="p-4 text-slate-600">${sub.role}</td>
-                        <td class="p-4 text-slate-600 font-medium text-sm">${sub.turno || 'Ambos'}</td>
-                        <td class="p-4 text-red-600 font-semibold">${sub.absent}</td>
-                        <td class="p-4 text-green-600 font-semibold">${sub.substitute}</td>
-                        <td class="p-4 text-slate-500 text-sm italic truncate max-w-xs" title="${sub.obs}">${sub.obs || '-'}</td>
-                        <td class="p-4 text-right">
-                            <button type="button" onclick="deleteSubstituicao('${sub.id}')" class="text-slate-400 hover:text-red-500 transition-colors" title="Remover registro">
-                                <i class="ph ph-trash text-lg"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
+            tbody.innerHTML = subsArray.map(sub => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-5 font-bold text-slate-800">${formatDateBR(sub.date)} <span class="block text-[10px] text-slate-400 uppercase tracking-widest mt-1">${sub.turno || 'Ambos'}</span></td>
+                    <td class="p-5 font-medium">${sub.role}</td>
+                    <td class="p-5 text-red-500 font-bold">(-) ${sub.absent}</td>
+                    <td class="p-5 text-emerald-600 font-bold">(+) ${sub.substitute}</td>
+                    <td class="p-5 text-center">
+                        <button onclick="deleteSubstituicao('${sub.id}')" class="text-slate-300 hover:text-red-500 transition-colors"><i class="ph-fill ph-trash text-xl"></i></button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        // --- RENDERIZAÇÃO: ESTATÍSTICAS ---
+        // ==========================================
+        // ESTATÍSTICAS E CADASTRO
+        // ==========================================
         function renderEstatisticas() {
             const uniqueMembers = getUniqueMembers();
+            const subsArray = appState.substitutions || [];
             const stats = [];
 
             uniqueMembers.forEach(nome => {
                 let esperado = 0;
-                appState.schedules.forEach(esc => {
-                    Object.entries(esc.assignments).forEach(([role, membroEscalado]) => {
-                        if (role === "Seleção de Repertório") return;
+                appState.schedules.forEach(esc => Object.entries(esc.assignments).forEach(([role, membro]) => {
+                    if (role !== "Seleção de Repertório" && membro === nome) esperado += (DEPARTMENTS[role] === "Mídia") ? 1 : 2;
+                }));
 
-                        if(membroEscalado === nome) {
-                            esperado += (DEPARTMENTS[role] === "Mídia") ? 1 : 2;
-                        }
-                    });
-                });
-
-                let faltas = 0;
-                let extras = 0;
-
-                appState.substitutions.forEach(sub => {
+                let faltas = 0, extras = 0;
+                subsArray.forEach(sub => {
                     if (sub.role === "Seleção de Repertório") return;
-
-                    let peso = (sub.turno === 'Manhã' || sub.turno === 'Noite') ? 1 : 2;
-                    if (DEPARTMENTS[sub.role] === "Mídia") peso = 1;
-
+                    let peso = (sub.turno === 'Manhã' || sub.turno === 'Noite' || DEPARTMENTS[sub.role] === "Mídia") ? 1 : 2;
                     if (sub.absent === nome) faltas += peso;
                     if (sub.substitute === nome) extras += peso;
                 });
 
-                let totalRealizado = esperado - faltas + extras;
-                let percentual = 0;
-
-                if (esperado > 0) {
-                    percentual = ((totalRealizado / esperado) * 100).toFixed(1);
-                } else if (totalRealizado > 0) {
-                    percentual = 100;
-                }
-
-                stats.push({ nome, esperado, faltas, extras, totalRealizado, percentual: parseFloat(percentual) });
+                let totalReal = esperado - faltas + extras;
+                let percentual = esperado > 0 ? ((totalReal / esperado) * 100).toFixed(1) : (totalReal > 0 ? 100 : 0);
+                stats.push({ nome, esperado, faltas, extras, totalReal, percentual: parseFloat(percentual) });
             });
 
             stats.sort((a, b) => b.percentual - a.percentual || a.nome.localeCompare(b.nome));
+            
+            document.getElementById('estatisticas-table-body').innerHTML = stats.map(st => {
+                let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                if(st.percentual < 80) badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                if(st.percentual < 50) badgeClass = 'bg-red-50 text-red-700 border-red-200';
 
-            const tbody = document.getElementById('estatisticas-table-body');
-            tbody.innerHTML = '';
-
-            stats.forEach(st => {
-                let badgeClass = 'bg-green-100 text-green-800 border border-green-200';
-                if(st.percentual < 80) badgeClass = 'bg-yellow-100 text-yellow-800 border border-yellow-200';
-                if(st.percentual < 50) badgeClass = 'bg-red-100 text-red-800 border border-red-200';
-
-                tbody.innerHTML += `
+                return `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-4 font-bold text-presb-green">${st.nome}</td>
-                        <td class="p-4 text-center font-medium">${st.esperado}</td>
-                        <td class="p-4 text-center font-bold ${st.faltas > 0 ? 'text-red-600' : 'text-slate-300'}">${st.faltas > 0 ? '-' + st.faltas : 0}</td>
-                        <td class="p-4 text-center font-bold ${st.extras > 0 ? 'text-green-600' : 'text-slate-300'}">${st.extras > 0 ? '+' + st.extras : 0}</td>
-                        <td class="p-4 text-center font-black text-lg text-slate-800">${st.totalRealizado}</td>
-                        <td class="p-4 text-right">
-                            <span class="px-3 py-1.5 rounded font-bold text-sm ${badgeClass}">
-                                ${st.percentual}%
-                            </span>
-                        </td>
+                        <td class="p-5 font-black text-presb-green">${st.nome}</td>
+                        <td class="p-5 text-center font-bold text-slate-500">${st.esperado}</td>
+                        <td class="p-5 text-center font-bold ${st.faltas > 0 ? 'text-red-500' : 'text-slate-300'}">${st.faltas > 0 ? '-'+st.faltas : 0}</td>
+                        <td class="p-5 text-center font-bold ${st.extras > 0 ? 'text-emerald-600' : 'text-slate-300'}">${st.extras > 0 ? '+'+st.extras : 0}</td>
+                        <td class="p-5 text-center font-black text-lg text-slate-800">${st.totalReal}</td>
+                        <td class="p-5 text-right"><span class="px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest ${badgeClass}">${st.percentual}%</span></td>
                     </tr>
                 `;
-            });
+            }).join('');
         }
 
-        // --- RENDERIZAÇÃO: CADASTRO ---
         function renderCadastro() {
-            const selectFuncao = document.getElementById('cad-funcao');
-            selectFuncao.innerHTML = '<option value="">Selecione...</option>' + 
-                COLUMNS_ORDER.map(r => `<option value="${r}">${r}</option>`).join('');
+            document.getElementById('cad-funcao').innerHTML = '<option value="">Selecione...</option>' + COLUMNS_ORDER.map(r => `<option value="${r}">${r}</option>`).join('');
+            
+            document.getElementById('cadastro-grid').innerHTML = COLUMNS_ORDER.map(role => {
+                const members = appState.members[role] || [];
+                let listHTML = members.length === 0 ? `<p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest italic p-6 text-center">Nenhum integrante</p>` : 
+                    `<ul class="divide-y divide-slate-50 flex-1 overflow-y-auto max-h-48">` + members.sort().map(m => `
+                        <li class="p-4 flex justify-between items-center hover:bg-slate-50 text-sm group transition-colors">
+                            <span class="font-bold text-slate-700">${m}</span>
+                            <button onclick="deleteMember('${role}', '${m}')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"><i class="ph-bold ph-trash text-lg"></i></button>
+                        </li>`).join('') + `</ul>`;
 
-            const grid = document.getElementById('cadastro-grid');
-            grid.innerHTML = '';
-
-            COLUMNS_ORDER.forEach(role => {
-                const members = appState.members[role];
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col';
-                
-                let listHTML = '';
-                if(members.length === 0) {
-                    listHTML = `<p class="text-slate-400 text-sm italic p-4 text-center">Nenhum integrante</p>`;
-                } else {
-                    listHTML = `<ul class="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-48 custom-scrollbar">`;
-                    members.sort().forEach(m => {
-                        listHTML += `
-                            <li class="p-3 flex justify-between items-center hover:bg-slate-50 text-sm group">
-                                <span class="font-medium text-slate-700">${m}</span>
-                                <button type="button" onclick="deleteMember('${role}', '${m}')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all">
-                                    <i class="ph-fill ph-trash text-lg"></i>
-                                </button>
-                            </li>
-                        `;
-                    });
-                    listHTML += `</ul>`;
-                }
-
-                card.innerHTML = `
-                    <div class="bg-slate-50 border-b border-slate-200 p-3 flex justify-between items-center">
-                        <h4 class="font-serif font-bold text-presb-green">${role}</h4>
-                        <span class="bg-presb-green/10 text-presb-green text-xs font-bold px-2.5 py-1 rounded">${members.length}</span>
+                return `
+                    <div class="bg-white rounded-[1.5rem] shadow-md border border-slate-100 overflow-hidden flex flex-col hover:border-presb-gold/30 transition-colors">
+                        <div class="bg-slate-50 border-b border-slate-100 p-4 flex justify-between items-center">
+                            <h4 class="font-serif font-bold text-presb-green text-sm">${role}</h4>
+                            <span class="bg-presb-green/10 text-presb-green text-[10px] font-black px-2.5 py-1 rounded-lg">${members.length}</span>
+                        </div>
+                        ${listHTML}
                     </div>
-                    ${listHTML}
                 `;
-                grid.appendChild(card);
-            });
+            }).join('');
         }
 
         function handleAddMember(e) {
@@ -1049,48 +857,83 @@
             const name = formatName(nameInput.value.trim());
 
             if(!role || !name) return;
-
-            if(appState.members[role].includes(name)) {
-                showToast("Este integrante já está cadastrado nesta função!", true);
-                return;
-            }
+            if(!appState.members[role]) appState.members[role] = [];
+            if(appState.members[role].includes(name)) return showToast("Integrante já cadastrado!", true);
 
             appState.members[role].push(name);
             nameInput.value = '';
-            renderCadastro();
-            
-            if(!document.getElementById('sec-escalas').classList.contains('hidden')){
-                renderEscalas();
-            }
-
-            showToast('Integrante adicionado!');
+            saveStateToFirebase(); renderCadastro(); showToast('Adicionado!');
         }
 
         function deleteMember(role, name) {
-            openConfirmModal('Remover Integrante', `Remover ${name} da função de ${role}?`, () => {
+            openConfirmModal('Remover Integrante', `Excluir ${name} de ${role}?`, () => {
                 appState.members[role] = appState.members[role].filter(m => m !== name);
-                renderCadastro();
-                if(!document.getElementById('sec-escalas').classList.contains('hidden')){
-                    renderEscalas();
-                }
-                showToast('Integrante removido.');
+                saveStateToFirebase(); renderCadastro(); showToast('Removido.');
             });
         }
 
-        // --- INICIALIZAÇÃO ---
-        window.onload = () => {
-            // Verifica se o usuário já fez o login nesta aba do navegador
-            if(sessionStorage.getItem('isLoggedIn') === 'true') {
-                document.getElementById('login-screen').classList.add('hidden');
-                startApp();
-            } else {
-                // Remove hidden do login-screen caso esteja deslogado
-                document.getElementById('login-screen').classList.remove('hidden');
-            }
-        };
+        function formatName(name) {
+            const exceptions = ['da', 'de', 'do', 'das', 'dos'];
+            return name.toLowerCase().split(' ').map((word, i) => (i > 0 && exceptions.includes(word)) ? word : word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        // ==========================================
+        // UI FEEDBACK (TOAST / MODAL)
+        // ==========================================
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            toast.className = `fixed bottom-6 right-6 border-2 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transform z-[110] transition-all duration-500 ${isError ? 'bg-red-600 border-red-400' : 'bg-presb-green border-presb-gold'}`;
+            icon.className = `text-2xl ${isError ? 'ph-bold ph-warning-circle text-white' : 'ph-fill ph-check-circle text-presb-gold'}`;
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3000);
+        }
+
+        let confirmActionCallback = null;
+        function openConfirmModal(title, message, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            confirmActionCallback = callback;
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+        }
+
+        function closeConfirmModal(confirmed) {
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if(confirmed && confirmActionCallback) confirmActionCallback();
+                confirmActionCallback = null;
+            }, 300);
+        }
+
+        // ==========================================
+        // EXPORTAÇÃO PARA O HTML GLOBAL
+        // ==========================================
+        window.startApp = startApp;
+        window.attemptSwitchTab = attemptSwitchTab;
+        window.requestAuth = requestAuth;
+        window.handleAuthSubmit = handleAuthSubmit;
+        window.closeAuthModal = closeAuthModal;
+        window.logoutAdmin = logoutAdmin;
+        window.renderEscalas = renderEscalas;
+        window.exportarPDF = exportarPDF;
+        window.updateAssignment = updateAssignment;
+        window.updateAbsentPerson = updateAbsentPerson;
+        window.handleSubstituicao = handleSubstituicao;
+        window.deleteSubstituicao = deleteSubstituicao;
+        window.handleAddMember = handleAddMember;
+        window.deleteMember = deleteMember;
+        window.closeConfirmModal = closeConfirmModal;
+
+        // Start imediato
+        window.onload = startApp;
 
     </script>
 </body>
 </html>
-
-
