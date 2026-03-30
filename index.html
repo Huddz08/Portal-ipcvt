@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Núcleo IPCVT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Verde característico da Igreja Presbiteriana (IPB)
+                        'ipb-green': '#006B3F', 
+                        'ipb-light': '#008c52',
+                        'ipb-dark': '#004d2d',
+                        // Dourado para o texto IPCVT
+                        'ipb-gold': '#F5C518',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Biblioteca de Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800 selection:bg-ipb-green selection:text-white flex flex-col">
+    
+    <!-- Cabeçalho -->
+    <header class="bg-ipb-green text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-5 flex items-center justify-center md:justify-between">
+            <div class="flex items-center gap-3">
+                <i data-lucide="church" class="w-7 h-7"></i>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide">Portal Núcleo <span class="text-ipb-gold">IPCVT</span></h1>
+            </div>
+            <p class="hidden md:block text-xs font-medium opacity-90 bg-ipb-dark px-3 py-1 rounded-full uppercase tracking-wider">
+                Sistemas Internos
+            </p>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full flex flex-col justify-center">
+        
+        <div class="mb-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-800">Selecione o Aplicativo</h2>
+            <p class="text-gray-500 mt-1 text-sm md:text-base">Toque em um dos quadros abaixo para acessar</p>
+        </div>
+
+        <!-- Grade de Quadros (Lado a Lado no Celular) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto w-full">
+
+            <!-- Quadro 1: Escala do Louvor (Link Externo) -->
+            <a href="https://escala-louvor-public.web.app" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
+                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <i data-lucide="mic-2" class="w-8 h-8 md:w-10 md:h-10"></i>
+                </div>
+                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Escala do<br>Louvor</h3>
+                <p class="text-xs text-gray-500 mt-2 hidden md:block">Organizar repertório e músicos.</p>
+            </a>
+
+            <!-- Quadro 2: Votação para Repertório -->
+            <a href="votacao.html" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
+                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <!-- Ícone customizado: Pódio de 1º, 2º e 3º lugar -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 md:w-10 md:h-10">
+                        <path d="M3 22h18" />
+                        <path d="M9 22V8h6v14" />
+                        <path d="M3 22V12h6" />
+                        <path d="M15 16h6v6" />
+                    </svg>
+                </div>
+                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Votação de<br>Repertório</h3>
+                <p class="text-xs text-gray-500 mt-2 hidden md:block">Escolha interativa de músicas.</p>
+            </a>
+
+            <!-- Quadro 3: Escala Geral -->
+            <a href="escala_geral.html" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
+                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <i data-lucide="calendar-days" class="w-8 h-8 md:w-10 md:h-10"></i>
+                </div>
+                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Escala<br>Geral</h3>
+                <p class="text-xs text-gray-500 mt-2 hidden md:block">Recepção, Som, Diaconia, etc.</p>
+            </a>
+
+            <!-- Quadro 4: Vaquinhas -->
+            <a href="vaquinhas.html" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-3xl shadow-sm border-2 border-transparent hover:border-ipb-green hover:shadow-lg transition-all duration-300 text-center aspect-square md:aspect-auto md:h-64">
+                <div class="bg-green-50 text-ipb-green p-4 rounded-full mb-3 md:mb-4 group-hover:bg-ipb-green group-hover:text-white transition-colors duration-300 shadow-sm">
+                    <i data-lucide="piggy-bank" class="w-8 h-8 md:w-10 md:h-10"></i>
+                </div>
+                <h3 class="text-base md:text-lg font-bold text-gray-800 leading-tight">Vaquinhas</h3>
+                <p class="text-xs text-gray-500 mt-2 hidden md:block">Arrecadação e controle financeiro.</p>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="py-6 text-center text-gray-400 text-xs">
+        <p>&copy; 2026 Portal Núcleo IPCVT.</p>
+    </footer>
+
+    <script>
+        // Inicializa os ícones do Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
+
