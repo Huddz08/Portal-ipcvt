@@ -51,12 +51,40 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 pb-20 selection:bg-presb-gold selection:text-presb-green">
 
+    <!-- Tela de Carregamento Inicial -->
+    <div id="loading-data" class="fixed inset-0 bg-white/90 backdrop-blur-md z-[2000] flex flex-col items-center justify-center transition-opacity duration-500">
+        <i class="ph-bold ph-circle-notch text-6xl text-presb-gold animate-spin mb-4"></i>
+        <p class="text-presb-green font-black uppercase text-xs tracking-widest mt-4">Sincronizando Nuvem</p>
+    </div>
+
     <div id="app"></div>
 
     <script type="module">
-        // --- CONFIGURAÇÕES ---
-        const apiKey = "AIzaSyAdrQXB8xf3uEcboM2dFNVHi6z9JJdH7uE";
+        // --- IMPORTAÇÕES DO FIREBASE ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // --- CONFIGURAÇÕES DO FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAg9w5QohkcmXUFRgLfSI5Sh1chnCD1Owc",
+            authDomain: "repertorio-ipcvt.firebaseapp.com",
+            projectId: "repertorio-ipcvt",
+            storageBucket: "repertorio-ipcvt.firebasestorage.app",
+            messagingSenderId: "774659782213",
+            appId: "1:774659782213:web:5e9cbf88fec30eb382152c",
+            measurementId: "G-DJ8E3VPMSY"
+        };
+
+        const appFirebase = initializeApp(firebaseConfig);
+        const db = getFirestore(appFirebase);
+        const auth = getAuth(appFirebase);
+
+        // Chave Gemini para a IA (Aqui no ambiente de teste DEVE se chamar apiKey e ficar vazia)
+        // ATENÇÃO: Quando for subir pro GitHub, coloque a sua chave "AIzaSy..." dentro destas aspas!
+        const apiKey = ""; 
+
+        // --- DADOS PADRÃO ---
         const THEMES = [
             { title: "Adoração e Louvor", desc: "Músicas focadas na exaltação dos atributos de Deus." },
             { title: "Comunhão", desc: "Canções que celebram a unidade do corpo de Cristo." },
@@ -95,12 +123,11 @@
         ];
 
         // --- ESTADO GLOBAL ---
+        let isFirebaseConnected = false;
+        
         const state = {
+            // Persistidos no Firebase
             users: [...INITIAL_USERS],
-            currentUser: null,
-            activeTab: 'home',
-            isAdminAuthenticated: false,
-            currentPeriodId: 'p1',
             periods: [{
                 id: 'p1',
                 name: "1º Bimestre",
@@ -109,7 +136,13 @@
                 suggestionsOpen: true,
                 votingOpen: false
             }],
+            currentPeriodId: 'p1',
             songs: [],
+            
+            // Controle Local de Interface
+            currentUser: null,
+            activeTab: 'home',
+            isAdminAuthenticated: false,
             isSubmitting: false,
             loginError: false,
             editingUserId: null,
@@ -124,12 +157,74 @@
             get: function() { return this.periods.find(p => p.id === this.currentPeriodId); }
         });
 
-        // --- FUNÇÕES AUXILIARES ---
-        window.getYouTubeEmbedUrl = function(url) {
+        // --- INICIALIZAÇÃO FIREBASE ---
+        window.onload = async () => {
+            document.getElementById('loading-data').classList.remove('hidden');
+            try { 
+                await signInAnonymously(auth); 
+                initFirebaseConnection();
+            } catch (e) { 
+                console.warn("Modo offline ativo", e);
+                initFirebaseConnection(); 
+            }
+        };
+
+        function initFirebaseConnection() {
+            const docRef = doc(db, "app_ipcvt", "votacao_dados");
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.users = data.users || state.users;
+                    state.periods = data.periods || state.periods;
+                    state.currentPeriodId = data.currentPeriodId || state.currentPeriodId;
+                    state.songs = data.songs || [];
+                } else {
+                    isFirebaseConnected = true;
+                    saveStateToFirebase();
+                }
+                
+                if (!isFirebaseConnected) {
+                    isFirebaseConnected = true;
+                    document.getElementById('loading-data').classList.add('opacity-0');
+                    setTimeout(() => document.getElementById('loading-data').classList.add('hidden'), 500);
+                }
+                
+                render(); 
+            }, (error) => {
+                console.error("Erro na leitura do Firestore:", error);
+                document.getElementById('loading-data').classList.add('hidden');
+            });
+        }
+
+        async function saveStateToFirebase() {
+            if (!isFirebaseConnected) return; 
+            const dataToSave = {
+                users: state.users,
+                periods: state.periods,
+                currentPeriodId: state.currentPeriodId,
+                songs: state.songs
+            };
+            try {
+                await setDoc(doc(db, "app_ipcvt", "votacao_dados"), dataToSave);
+            } catch (error) {
+                console.error("Erro ao salvar no Firebase. Verifique suas regras:", error);
+            }
+        }
+
+        // --- FUNÇÕES AUXILIARES DE VÍDEO E STATUS ---
+        window.getYouTubeVideoId = function(url) {
             if (!url) return null;
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            // Regex melhorada para capturar IDs precisos de diversos formatos (youtu.be, watch, shorts, embed)
+            const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|shorts\/)([^"&?\/\s]{11})/i;
             const match = url.match(regExp);
-            if (match && match[2].length === 11) return `https://www.youtube.com/embed/${match[2]}`;
+            return match ? match[1] : null;
+        };
+
+        window.getYouTubeEmbedUrl = function(url) {
+            const videoId = window.getYouTubeVideoId(url);
+            // Parâmetros de URL ajustados para mitigar o Erro 153 (rel=0 e controle de API)
+            if (videoId) return `https://www.youtube.com/embed/${videoId}?rel=0&enablejsapi=1`;
             return null;
         };
 
@@ -179,6 +274,9 @@
                         ${renderTabButton('votacao', 'Votação', 'ph-check-square-offset')}
                         ${renderTabButton('analise', 'Análise', 'ph-shield-check')}
                         ${renderTabButton('cadastro', 'Membros', 'ph-users-three')}
+                        <a href="index.html" class="flex-1 min-w-[100px] flex items-center justify-center py-5 px-4 border-b-[3px] border-transparent font-bold text-[10px] uppercase tracking-widest text-slate-400 hover:text-presb-green transition-all whitespace-nowrap">
+                            <i class="ph-bold ph-arrow-left text-xl mr-2"></i> Portal
+                        </a>
                     </div>
                 </nav>
 
@@ -200,17 +298,19 @@
         }
 
         function renderLogin() {
-            const options = state.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+            const sortedUsers = [...state.users].sort((a, b) => a.name.localeCompare(b.name));
+            const options = sortedUsers.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+            
             return `
                 <div class="min-h-screen bg-presb-dark flex items-center justify-center p-6 fade-in bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-presb-green to-presb-dark">
-                    <div class="bg-white p-10 md:p-12 rounded-[3rem] shadow-2xl border-t-8 border-presb-gold w-full max-w-md text-center">
-                        <div class="bg-presb-gold/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 text-presb-gold text-5xl shadow-inner">
+                    <div class="bg-white p-10 md:p-12 rounded-[3rem] shadow-2xl border-t-8 border-presb-gold w-full max-w-md text-center relative overflow-hidden">
+                        <div class="bg-presb-gold/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 text-presb-gold text-5xl shadow-inner relative z-10">
                             <i class="ph-fill ph-music-notes"></i>
                         </div>
-                        <h2 class="text-3xl font-black text-presb-green mb-2 leading-tight font-serif tracking-tight">Votação de Músicas</h2>
-                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-10">Revitalização do Repertório</p>
+                        <h2 class="text-3xl font-black text-presb-green mb-2 leading-tight font-serif tracking-tight relative z-10">Votação de Músicas</h2>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-10 relative z-10">Revitalização do Repertório</p>
                         
-                        <form onsubmit="window.handleUserLogin(event)" class="space-y-6 text-left">
+                        <form onsubmit="window.handleUserLogin(event)" class="space-y-6 text-left relative z-10">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1 tracking-widest">Selecione seu Nome</label>
                                 <select id="login-user-select" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-presb-gold font-bold text-slate-700 appearance-none shadow-sm transition-colors">
@@ -350,7 +450,7 @@
                             </div>
                             
                             <button type="submit" ${state.isSubmitting ? 'disabled' : ''} class="w-full py-5 bg-presb-green hover:bg-black text-white font-black rounded-2xl shadow-xl transition-all disabled:opacity-50 uppercase tracking-widest text-xs active:scale-95 border-b-4 border-black/20">
-                                ${state.isSubmitting ? 'Processando...' : 'Confirmar Indicação'}
+                                ${state.isSubmitting ? 'Salvando na nuvem...' : 'Confirmar Indicação'}
                             </button>
                         </form>
                     </div>
@@ -358,6 +458,7 @@
             `;
         }
 
+        // --- ABA DE VOTAÇÃO (Com suporte seguro e permissões ao Iframe do YouTube) ---
         function renderVotacaoTab() {
             const fullyApproved = state.songs.filter(s => s.joaoApproval === 'approved' && s.techApproval === 'approved');
             
@@ -379,17 +480,27 @@
                             <h3 class="font-bold text-slate-500 uppercase tracking-widest text-xs font-serif leading-relaxed">Nenhuma proposta aprovada<br>na curadoria ainda.</h3>
                         </div>
                     ` : `
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             ${fullyApproved.map(song => {
                                 const isMyVote = song.voters.includes(state.currentUser.id);
+                                const embed = window.getYouTubeEmbedUrl(song.link);
+                                
+                                // Adicionado propriedades 'allow' modernas para evitar bloqueios do navegador e do YouTube
+                                const videoHtml = embed 
+                                    ? '<div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-sm mb-4"><iframe src="' + embed + '" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
+                                    : '<div class="w-full aspect-video bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-4 border-2 border-dashed border-slate-200"><i class="ph-fill ph-video-camera-slash text-2xl mb-1 opacity-50"></i> Sem Vídeo</div>';
+
                                 return `
-                                    <div class="relative bg-white p-8 rounded-[3rem] border-2 transition-all duration-300 flex flex-col shadow-lg ${isMyVote ? 'border-presb-gold bg-presb-gold/5 transform -translate-y-2' : 'border-slate-100 hover:border-presb-green/30'}">
-                                        <div class="flex-1 mb-8">
+                                    <div class="relative bg-white p-6 sm:p-8 rounded-[3rem] border-2 transition-all duration-300 flex flex-col shadow-lg ${isMyVote ? 'border-presb-gold bg-presb-gold/5 transform -translate-y-2' : 'border-slate-100 hover:border-presb-green/30'}">
+                                        <div class="flex-1 mb-4">
                                             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3">Opção de Repertório</p>
-                                            <h4 class="font-bold text-2xl text-presb-green mb-2 leading-tight font-serif">${song.title}</h4>
+                                            <h4 class="font-bold text-xl sm:text-2xl text-presb-green mb-2 leading-tight font-serif">${song.title}</h4>
                                             <p class="text-xs font-medium text-slate-500 uppercase">${song.author}</p>
                                         </div>
-                                        <button onclick="window.handleVote('${song.id}')" class="w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-md ${isMyVote ? 'bg-presb-gold text-presb-dark' : 'bg-slate-800 text-white hover:bg-presb-green'} active:scale-95">
+                                        
+                                        ${videoHtml}
+
+                                        <button onclick="window.handleVote('${song.id}')" class="w-full mt-auto py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-md ${isMyVote ? 'bg-presb-gold text-presb-dark' : 'bg-slate-800 text-white hover:bg-presb-green'} active:scale-95">
                                             ${isMyVote ? '<i class="ph-bold ph-check-circle text-lg mr-2 align-middle"></i> Registrado' : 'Votar'}
                                         </button>
                                     </div>
@@ -401,6 +512,7 @@
             `;
         }
 
+        // --- ABA ANÁLISE ---
         function renderAnaliseTab() {
             if (!state.isAdminAuthenticated) return renderAdminAuth('Conselho e Liderança');
 
@@ -458,6 +570,8 @@
 
         function renderSongCard(song) {
             const embed = window.getYouTubeEmbedUrl(song.link);
+            
+            // CORREÇÃO CRÍTICA DO SYNTAX ERROR: O botão "MOTIVO" agora passa apenas a ID da música (song.id), em vez de injetar o texto do motivo direto no atributo HTML
             return `
                 <div class="bg-white rounded-[3rem] border border-slate-100 shadow-xl flex flex-col md:flex-row overflow-hidden hover:border-presb-gold/50 transition-all duration-300">
                     <div class="w-full md:w-[45%] p-8 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-slate-50">
@@ -466,7 +580,7 @@
                             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate mb-4">${song.author}</p>
                             <span class="text-[9px] bg-white border border-slate-200 text-slate-500 px-4 py-2 rounded-xl font-bold uppercase tracking-widest flex items-center w-fit shadow-sm"><i class="ph-fill ph-user mr-2 text-presb-gold"></i> Indicado por ${song.proposerName}</span>
                         </div>
-                        ${embed ? `<div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-lg mt-auto"><iframe src="${embed}" class="w-full h-full" frameborder="0" allowfullscreen></iframe></div>` : `<div class="w-full aspect-video bg-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-auto border-2 border-dashed border-slate-200"><i class="ph-fill ph-video-camera-slash text-4xl mb-2 opacity-50"></i> Sem Vídeo</div>`}
+                        ${embed ? `<div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-lg mt-auto"><iframe src="${embed}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : `<div class="w-full aspect-video bg-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-auto border-2 border-dashed border-slate-200"><i class="ph-fill ph-video-camera-slash text-4xl mb-2 opacity-50"></i> Sem Vídeo</div>`}
                     </div>
 
                     <div class="w-full md:w-[55%] p-8 flex flex-col bg-white">
@@ -496,13 +610,13 @@
                             <div class="flex flex-col border-l border-slate-100 pl-4">
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex justify-between items-center">2. Teologia ${song.joaoApproval !== 'pending' ? `<i class="ph-bold ph-arrow-u-up-left cursor-pointer text-presb-green" onclick="window.setApproval('${song.id}', 'joao', 'pending')"></i>` : ''}</span>
                                 <div class="h-10 flex items-center justify-center">
-                                    ${song.joaoApproval === 'pending' ? `<div class="flex gap-2 w-full"><button onclick="window.setApproval('${song.id}', 'joao', 'approved')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-presb-green hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-check text-lg"></i></button><button onclick="window.setApproval('${song.id}', 'joao', 'rejected')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-red-600 hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div>` : song.joaoApproval === 'rejected' ? `<button onclick="window.openViewReasonModal('Reprovação Doutrinária', '${song.joaoReason}')" class="w-full text-[9px] font-bold bg-red-50 text-red-700 h-10 rounded-xl border border-red-200 tracking-widest">MOTIVO</button>` : window.getStatusBadgeHtml('Aprovado')}
+                                    ${song.joaoApproval === 'pending' ? `<div class="flex gap-2 w-full"><button onclick="window.setApproval('${song.id}', 'joao', 'approved')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-presb-green hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-check text-lg"></i></button><button onclick="window.setApproval('${song.id}', 'joao', 'rejected')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-red-600 hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div>` : song.joaoApproval === 'rejected' ? `<button onclick="window.openViewReasonModal('Reprovação Doutrinária', '${song.id}', 'joao')" class="w-full text-[9px] font-bold bg-red-50 text-red-700 h-10 rounded-xl border border-red-200 tracking-widest">MOTIVO</button>` : window.getStatusBadgeHtml('Aprovado')}
                                 </div>
                             </div>
                             <div class="flex flex-col border-l border-slate-100 pl-4">
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex justify-between items-center">3. Técnica ${song.techApproval !== 'pending' ? `<i class="ph-bold ph-arrow-u-up-left cursor-pointer text-presb-green" onclick="window.setApproval('${song.id}', 'tech', 'pending')"></i>` : ''}</span>
                                 <div class="h-10 flex items-center justify-center">
-                                    ${song.techApproval === 'pending' ? `<div class="flex gap-2 w-full"><button onclick="window.setApproval('${song.id}', 'tech', 'approved')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-presb-green hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-check text-lg"></i></button><button onclick="window.setApproval('${song.id}', 'tech', 'rejected')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-red-600 hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div>` : song.techApproval === 'rejected' ? `<button onclick="window.openViewReasonModal('Reprovação Técnica', '${song.techReason}')" class="w-full text-[9px] font-bold bg-red-50 text-red-700 h-10 rounded-xl border border-red-200 tracking-widest">MOTIVO</button>` : window.getStatusBadgeHtml('Aprovado')}
+                                    ${song.techApproval === 'pending' ? `<div class="flex gap-2 w-full"><button onclick="window.setApproval('${song.id}', 'tech', 'approved')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-presb-green hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-check text-lg"></i></button><button onclick="window.setApproval('${song.id}', 'tech', 'rejected')" class="flex-1 h-10 flex items-center justify-center bg-slate-100 hover:bg-red-600 hover:text-white rounded-xl text-slate-400 transition-colors"><i class="ph-bold ph-x text-lg"></i></button></div>` : song.techApproval === 'rejected' ? `<button onclick="window.openViewReasonModal('Reprovação Técnica', '${song.id}', 'tech')" class="w-full text-[9px] font-bold bg-red-50 text-red-700 h-10 rounded-xl border border-red-200 tracking-widest">MOTIVO</button>` : window.getStatusBadgeHtml('Aprovado')}
                                 </div>
                             </div>
                         </div>
@@ -618,8 +732,9 @@
             `;
         }
 
-        // --- HANDLERS TAREFAS ---
+        // --- HANDLERS TAREFAS (Com salvamento no Firebase) ---
         window.changeTab = (tab) => { state.activeTab = tab; render(); };
+        
         window.handleUserLogin = (e) => {
             e.preventDefault();
             const uid = document.getElementById('login-user-select').value;
@@ -631,7 +746,9 @@
             else { state.loginError = true; }
             render();
         };
+        
         window.handleUserLogout = () => { state.currentUser = null; state.isAdminAuthenticated = false; render(); };
+        
         window.handleRegisterUser = (e) => {
             e.preventDefault();
             const n = document.getElementById('reg-name-input').value;
@@ -642,8 +759,10 @@
             } else {
                 state.users.push({ id: 'u'+Date.now(), name: n, phone: p });
             }
+            saveStateToFirebase(); 
             render();
         };
+        
         window.handleEditUser = (id) => {
             const u = state.users.find(u => u.id === id);
             state.editingUserId = id;
@@ -654,7 +773,9 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 50);
         };
+        
         window.cancelEditUser = () => { state.editingUserId = null; render(); };
+        
         window.submitSong = (e) => {
             e.preventDefault();
             const f = e.target;
@@ -673,15 +794,20 @@
                     techApproval: 'pending',
                     voters: []
                 });
-                state.isSubmitting = false; state.activeTab = 'home'; render();
+                state.isSubmitting = false; 
+                state.activeTab = 'home'; 
+                saveStateToFirebase(); 
+                render();
             }, 600);
         };
+        
         window.handleSearchYoutube = () => {
             const t = document.getElementById('input-title').value;
             const a = document.getElementById('input-author').value;
             if(!t) return alert("Indique o título da música.");
             window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(t+' '+a+' louvor')}`, '_blank');
         };
+        
         window.handleSearchLyrics = () => {
             const t = document.getElementById('input-title').value;
             const a = document.getElementById('input-author').value;
@@ -689,81 +815,113 @@
             window.open(`https://www.google.com/search?q=${encodeURIComponent(t+' '+a+' letra')}`, '_blank');
         };
 
+        // --- FUNÇÃO DA IA MELHORADA (CORS, FORMATO E CONFIABILIDADE) ---
         window.analyzeWithAI = async (id) => {
             const song = state.songs.find(s => s.id === id);
             const period = state.period;
 
             if (!song.lyrics || song.lyrics.trim().length < 10) {
                 song.aiAnalysis = { status: "Erro", reason: "Letra ausente ou muito curta para análise teológica." };
+                saveStateToFirebase();
                 render(); return;
             }
 
-            song.aiAnalysis = 'loading'; render();
+            song.aiAnalysis = 'loading'; 
+            render(); 
 
-            const prompt = `
-            # PROTOCOLO DE ANÁLISE LITÚRGICA E DOUTRINÁRIA (TRADIÇÃO REFORMADA)
-            Você deve agir como um Presbítero e Teólogo da tradição Presbiteriana.
-
-            ## 1. CRITÉRIO: CONFORMIDADE COM O TEMA
-            - O Tema do Ciclo é: "${period.theme}"
-            - Definição: "${period.themeDefinition}"
-
-            ## 2. CRITÉRIO: RIGOR TEOLÓGICO REFORMADO
-            - **Teocentrismo:** Deus é o centro?
-            - **Doutrina da Graça:** A salvação e a soberania de Deus estão corretas? Rejeite teologia da prosperidade.
-            - **Dignidade e Reverência:** A linguagem é adequada?
-
-            ---
-            Música: ${song.title} - ${song.author}
-            Letra: "${song.lyrics}"
-
-            ---
-            Retorne EXCLUSIVAMENTE um objeto JSON no formato:
-            {"status": "Aprovado" ou "Reprovado", "reason": "Sua análise em no máximo 3 frases curtas."}
-            `;
+            // Prompt otimizado e focado
+            const prompt = `Analise a seguinte música segundo a tradição Presbiteriana:
+Tema do Ciclo: "${period.theme}" (${period.themeDefinition})
+Música: ${song.title} - ${song.author}
+Letra: "${song.lyrics}"`;
 
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                // Modelo mais atual para tarefas de JSON (suporta schemas diretos com rapidez e evita formato Markdown errado)
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: {
+                            parts: [{ text: "Você é um Teólogo Presbiteriano. Avalie a música com rigor teológico reformado (teocentrismo, graça, reverência). Retorne JSON válido com 'status' (Aprovado ou Reprovado) e 'reason' (Justificativa em até 3 frases)." }]
+                        },
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    status: { type: "STRING" },
+                                    reason: { type: "STRING" }
+                                },
+                                required: ["status", "reason"]
+                            }
+                        }
+                    })
                 });
+                
                 const data = await res.json();
-                let txt = data.candidates[0].content.parts[0].text.replace(/```json\n?/i, '').replace(/\n?```$/i, '').trim();
-                song.aiAnalysis = JSON.parse(txt);
+                
+                if(data.error) {
+                     song.aiAnalysis = { status: "Erro", reason: "Erro na API: " + data.error.message }; 
+                } else {
+                     let txt = data.candidates[0].content.parts[0].text;
+                     song.aiAnalysis = JSON.parse(txt);
+                }
+                
             } catch (e) { 
-                song.aiAnalysis = { status: "Erro", reason: "Falha na comunicação com a IA." }; 
+                console.error(e);
+                song.aiAnalysis = { status: "Erro", reason: apiKey === "" ? "Chave da API ausente. Insira sua chave no código (GitHub)." : "Servidor indisponível ou problema de conexão." }; 
             }
+            saveStateToFirebase(); 
             render();
         };
 
-        window.resetAIAnalysis = (id) => { state.songs.find(s => s.id === id).aiAnalysis = null; render(); };
+        window.resetAIAnalysis = (id) => { 
+            state.songs.find(s => s.id === id).aiAnalysis = null; 
+            saveStateToFirebase();
+            render(); 
+        };
+        
         window.handleVote = (id) => {
-            const hasVoted = state.songs.some(s => s.voters.includes(state.currentUser.id));
+            const currentlyVotedSong = state.songs.find(s => s.voters.includes(state.currentUser.id));
+            
+            // Limpa o voto da pessoa de todas as músicas
             state.songs.forEach(s => {
                 s.voters = s.voters.filter(uid => uid !== state.currentUser.id);
-                if (!hasVoted && s.id === id) s.voters.push(state.currentUser.id);
-                else if (hasVoted && s.id === id) s.voters.push(state.currentUser.id);
             });
+
+            // Se ela clicou numa música diferente, aplica o voto nela
+            if (!currentlyVotedSong || currentlyVotedSong.id !== id) {
+                const targetSong = state.songs.find(s => s.id === id);
+                if (targetSong) targetSong.voters.push(state.currentUser.id);
+            }
+            
+            saveStateToFirebase(); 
             render();
         };
+        
         window.loginAdmin = (e) => {
             e.preventDefault();
             if (document.getElementById('admin-password').value === '123') { state.isAdminAuthenticated = true; }
             else { document.getElementById('auth-error').classList.remove('hidden'); }
             render();
         };
+        
         window.setApproval = (id, type, status) => {
             const s = state.songs.find(s => s.id === id);
             if (status === 'rejected') { state.modals.reject = { isOpen: true, songId: id, type }; }
             else if (status === 'approved') {
                 if (type === 'joao') s.joaoApproval = 'approved';
                 if (type === 'tech') s.techApproval = 'approved';
+                saveStateToFirebase(); 
             } else {
                 if (type === 'joao') s.joaoApproval = 'pending';
                 if (type === 'tech') s.techApproval = 'pending';
+                saveStateToFirebase(); 
             }
             render();
         };
+        
         window.confirmRejection = () => {
             const r = document.getElementById('reject-reason-input').value;
             if(!r) return alert("Justificativa obrigatória.");
@@ -771,18 +929,35 @@
             if (state.modals.reject.type === 'joao') { s.joaoApproval = 'rejected'; s.joaoReason = r; }
             else { s.techApproval = 'rejected'; s.techReason = r; }
             window.closeRejectModal();
+            saveStateToFirebase(); 
         };
+        
         window.closeRejectModal = () => { state.modals.reject.isOpen = false; render(); };
-        window.openViewReasonModal = (title, text) => { state.modals.viewReason = { isOpen: true, title, text }; render(); };
+        
+        // CORREÇÃO: Puxando o motivo pelo ID da música, evita Syntax Error ao inserir o texto direto no HTML.
+        window.openViewReasonModal = (title, songId, type) => { 
+            const song = state.songs.find(s => s.id === songId);
+            const text = type === 'joao' ? song.joaoReason : song.techReason;
+            state.modals.viewReason = { isOpen: true, title, text }; 
+            render(); 
+        };
         window.closeViewReasonModal = () => { state.modals.viewReason.isOpen = false; render(); };
-        window.toggleSetting = (s) => { state.period[s] = !state.period[s]; render(); };
+        
+        window.toggleSetting = (s) => { 
+            state.period[s] = !state.period[s]; 
+            saveStateToFirebase(); 
+            render(); 
+        };
+        
         window.openNewPeriodModal = () => { state.modals.cycle = { isOpen: true, step: 1, error: false }; render(); };
         window.closeNewPeriodModal = () => { state.modals.cycle.isOpen = false; render(); };
+        
         window.handleCycleModalNext = () => {
             if (document.getElementById('cycle-password-input').value === '123') { state.modals.cycle.step = 2; state.modals.cycle.error = false; }
             else { state.modals.cycle.error = true; }
             render();
         };
+        
         window.confirmNewCycle = (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('cycle-new-name');
@@ -802,28 +977,10 @@
             state.currentPeriodId = newPeriod.id;
             state.songs = []; 
             state.modals.cycle.isOpen = false; 
+            
+            saveStateToFirebase(); 
             render();
         };
-
-        // Início
-        render();
     </script>
-    
-    <!-- Configuração Opcional do Firebase para Integração Futura -->
-    <!--
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        const firebaseConfig = {
-            apiKey: "AIzaSyAg9w5QohkcmXUFRgLfSI5Sh1chnCD1Owc",
-            authDomain: "repertorio-ipcvt.firebaseapp.com",
-            projectId: "repertorio-ipcvt",
-            storageBucket: "repertorio-ipcvt.firebasestorage.app",
-            messagingSenderId: "774659782213",
-            appId: "1:774659782213:web:5e9cbf88fec30eb382152c",
-            measurementId: "G-DJ8E3VPMSY"
-        };
-        const app = initializeApp(firebaseConfig);
-    </script>
-    -->
 </body>
 </html>
