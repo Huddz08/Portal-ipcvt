@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -20,10 +21,6 @@
                         'presb-green': '#1B4332',
                         'presb-gold': '#D4AF37',
                         'presb-dark': '#0d2119',
-                    },
-                    fontFamily: {
-                        'serif': ['Merriweather', 'serif'],
-                        'sans': ['Inter', 'sans-serif'],
                     }
                 }
             }
@@ -80,9 +77,8 @@
         const db = getFirestore(appFirebase);
         const auth = getAuth(appFirebase);
 
-        // Chave Gemini para a IA (Aqui no ambiente de teste DEVE se chamar apiKey e ficar vazia)
-        // ATENÇÃO: Quando for subir pro GitHub, coloque a sua chave "AIzaSy..." dentro destas aspas!
-        const apiKey = ""; 
+        // --- CHAVE DO GEMINI (IA) ---
+        const apiKey = "AIzaSyAdrQXB8xf3uEcboM2dFNVHi6z9JJdH7uE"; 
 
         // --- DADOS PADRÃO ---
         const THEMES = [
@@ -126,7 +122,6 @@
         let isFirebaseConnected = false;
         
         const state = {
-            // Persistidos no Firebase
             users: [...INITIAL_USERS],
             periods: [{
                 id: 'p1',
@@ -139,7 +134,6 @@
             currentPeriodId: 'p1',
             songs: [],
             
-            // Controle Local de Interface
             currentUser: null,
             activeTab: 'home',
             isAdminAuthenticated: false,
@@ -215,7 +209,6 @@
         // --- FUNÇÕES AUXILIARES DE VÍDEO E STATUS ---
         window.getYouTubeVideoId = function(url) {
             if (!url) return null;
-            // Regex melhorada para capturar IDs precisos de diversos formatos (youtu.be, watch, shorts, embed)
             const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|shorts\/)([^"&?\/\s]{11})/i;
             const match = url.match(regExp);
             return match ? match[1] : null;
@@ -223,7 +216,6 @@
 
         window.getYouTubeEmbedUrl = function(url) {
             const videoId = window.getYouTubeVideoId(url);
-            // Parâmetros de URL ajustados para mitigar o Erro 153 (rel=0 e controle de API)
             if (videoId) return `https://www.youtube.com/embed/${videoId}?rel=0&enablejsapi=1`;
             return null;
         };
@@ -458,7 +450,6 @@
             `;
         }
 
-        // --- ABA DE VOTAÇÃO (Com suporte seguro e permissões ao Iframe do YouTube) ---
         function renderVotacaoTab() {
             const fullyApproved = state.songs.filter(s => s.joaoApproval === 'approved' && s.techApproval === 'approved');
             
@@ -485,7 +476,6 @@
                                 const isMyVote = song.voters.includes(state.currentUser.id);
                                 const embed = window.getYouTubeEmbedUrl(song.link);
                                 
-                                // Adicionado propriedades 'allow' modernas para evitar bloqueios do navegador e do YouTube
                                 const videoHtml = embed 
                                     ? '<div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-sm mb-4"><iframe src="' + embed + '" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
                                     : '<div class="w-full aspect-video bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-4 border-2 border-dashed border-slate-200"><i class="ph-fill ph-video-camera-slash text-2xl mb-1 opacity-50"></i> Sem Vídeo</div>';
@@ -512,7 +502,6 @@
             `;
         }
 
-        // --- ABA ANÁLISE ---
         function renderAnaliseTab() {
             if (!state.isAdminAuthenticated) return renderAdminAuth('Conselho e Liderança');
 
@@ -571,7 +560,6 @@
         function renderSongCard(song) {
             const embed = window.getYouTubeEmbedUrl(song.link);
             
-            // CORREÇÃO CRÍTICA DO SYNTAX ERROR: O botão "MOTIVO" agora passa apenas a ID da música (song.id), em vez de injetar o texto do motivo direto no atributo HTML
             return `
                 <div class="bg-white rounded-[3rem] border border-slate-100 shadow-xl flex flex-col md:flex-row overflow-hidden hover:border-presb-gold/50 transition-all duration-300">
                     <div class="w-full md:w-[45%] p-8 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col bg-slate-50">
@@ -815,7 +803,7 @@
             window.open(`https://www.google.com/search?q=${encodeURIComponent(t+' '+a+' letra')}`, '_blank');
         };
 
-        // --- FUNÇÃO DA IA MELHORADA (CORS, FORMATO E CONFIABILIDADE) ---
+        // --- FUNÇÃO DA IA (GEMINI 1.5 FLASH) ---
         window.analyzeWithAI = async (id) => {
             const song = state.songs.find(s => s.id === id);
             const period = state.period;
@@ -824,6 +812,12 @@
                 song.aiAnalysis = { status: "Erro", reason: "Letra ausente ou muito curta para análise teológica." };
                 saveStateToFirebase();
                 render(); return;
+            }
+
+            if (!apiKey || apiKey === "SUA_CHAVE_AQUI") {
+                 song.aiAnalysis = { status: "Erro", reason: "Chave da IA ausente. Crie a chave no AI Studio e cole no código." };
+                 saveStateToFirebase();
+                 render(); return;
             }
 
             song.aiAnalysis = 'loading'; 
@@ -836,25 +830,17 @@ Música: ${song.title} - ${song.author}
 Letra: "${song.lyrics}"`;
 
             try {
-                // Modelo mais atual para tarefas de JSON (suporta schemas diretos com rapidez e evita formato Markdown errado)
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                // Endpoint oficial do modelo Gemini 1.5 Flash
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         contents: [{ parts: [{ text: prompt }] }],
                         systemInstruction: {
-                            parts: [{ text: "Você é um Teólogo Presbiteriano. Avalie a música com rigor teológico reformado (teocentrismo, graça, reverência). Retorne JSON válido com 'status' (Aprovado ou Reprovado) e 'reason' (Justificativa em até 3 frases)." }]
+                            parts: [{ text: "Você é um Teólogo Presbiteriano. Avalie a música com rigor teológico reformado (teocentrismo, graça, reverência). Retorne APENAS um JSON válido com a propriedade 'status' (exatamente 'Aprovado' ou 'Reprovado') e 'reason' (Justificativa em até 3 frases)." }]
                         },
                         generationConfig: {
-                            responseMimeType: "application/json",
-                            responseSchema: {
-                                type: "OBJECT",
-                                properties: {
-                                    status: { type: "STRING" },
-                                    reason: { type: "STRING" }
-                                },
-                                required: ["status", "reason"]
-                            }
+                            responseMimeType: "application/json"
                         }
                     })
                 });
@@ -870,7 +856,7 @@ Letra: "${song.lyrics}"`;
                 
             } catch (e) { 
                 console.error(e);
-                song.aiAnalysis = { status: "Erro", reason: apiKey === "" ? "Chave da API ausente. Insira sua chave no código (GitHub)." : "Servidor indisponível ou problema de conexão." }; 
+                song.aiAnalysis = { status: "Erro", reason: "Servidor indisponível ou problema de conexão." }; 
             }
             saveStateToFirebase(); 
             render();
@@ -885,12 +871,10 @@ Letra: "${song.lyrics}"`;
         window.handleVote = (id) => {
             const currentlyVotedSong = state.songs.find(s => s.voters.includes(state.currentUser.id));
             
-            // Limpa o voto da pessoa de todas as músicas
             state.songs.forEach(s => {
                 s.voters = s.voters.filter(uid => uid !== state.currentUser.id);
             });
 
-            // Se ela clicou numa música diferente, aplica o voto nela
             if (!currentlyVotedSong || currentlyVotedSong.id !== id) {
                 const targetSong = state.songs.find(s => s.id === id);
                 if (targetSong) targetSong.voters.push(state.currentUser.id);
@@ -934,7 +918,6 @@ Letra: "${song.lyrics}"`;
         
         window.closeRejectModal = () => { state.modals.reject.isOpen = false; render(); };
         
-        // CORREÇÃO: Puxando o motivo pelo ID da música, evita Syntax Error ao inserir o texto direto no HTML.
         window.openViewReasonModal = (title, songId, type) => { 
             const song = state.songs.find(s => s.id === songId);
             const text = type === 'joao' ? song.joaoReason : song.techReason;
@@ -984,3 +967,6 @@ Letra: "${song.lyrics}"`;
     </script>
 </body>
 </html>
+
+
+```
