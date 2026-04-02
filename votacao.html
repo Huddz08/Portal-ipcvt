@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- Fontes Institucionais -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,7 +47,6 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 pb-20 selection:bg-presb-gold selection:text-presb-green">
 
-    <!-- Tela de Carregamento Inicial -->
     <div id="loading-data" class="fixed inset-0 bg-white/90 backdrop-blur-md z-[2000] flex flex-col items-center justify-center transition-opacity duration-500">
         <i class="ph-bold ph-circle-notch text-6xl text-presb-gold animate-spin mb-4"></i>
         <p class="text-presb-green font-black uppercase text-xs tracking-widest mt-4">Sincronizando Nuvem</p>
@@ -174,7 +172,6 @@
                     state.currentPeriodId = data.currentPeriodId || state.currentPeriodId;
                     state.songs = data.songs || [];
                 } else {
-                    isFirebaseConnected = true;
                     saveStateToFirebase();
                 }
                 
@@ -188,6 +185,7 @@
             }, (error) => {
                 console.error("Erro na leitura do Firestore:", error);
                 document.getElementById('loading-data').classList.add('hidden');
+                alert("Erro ao conectar ao servidor. Verifique as regras do Firebase.");
             });
         }
 
@@ -202,7 +200,7 @@
             try {
                 await setDoc(doc(db, "app_ipcvt", "votacao_dados"), dataToSave);
             } catch (error) {
-                console.error("Erro ao salvar no Firebase. Verifique suas regras:", error);
+                console.error("Erro ao salvar no Firebase:", error);
             }
         }
 
@@ -720,7 +718,7 @@
             `;
         }
 
-        // --- HANDLERS TAREFAS (Com salvamento no Firebase) ---
+        // --- HANDLERS TAREFAS ---
         window.changeTab = (tab) => { state.activeTab = tab; render(); };
         
         window.handleUserLogin = (e) => {
@@ -803,7 +801,7 @@
             window.open(`https://www.google.com/search?q=${encodeURIComponent(t+' '+a+' letra')}`, '_blank');
         };
 
-        // --- FUNÇÃO DA IA (GEMINI 1.5 FLASH) ---
+        // --- FUNÇÃO DA IA (CORRIGIDA) ---
         window.analyzeWithAI = async (id) => {
             const song = state.songs.find(s => s.id === id);
             const period = state.period;
@@ -814,33 +812,28 @@
                 render(); return;
             }
 
-            if (!apiKey || apiKey === "SUA_CHAVE_AQUI") {
-                 song.aiAnalysis = { status: "Erro", reason: "Chave da IA ausente. Crie a chave no AI Studio e cole no código." };
-                 saveStateToFirebase();
-                 render(); return;
-            }
-
             song.aiAnalysis = 'loading'; 
             render(); 
 
-            // Prompt otimizado e focado
-            const prompt = `Analise a seguinte música segundo a tradição Presbiteriana:
-Tema do Ciclo: "${period.theme}" (${period.themeDefinition})
+            // Estruturação do prompt para o modelo Flash
+            const prompt = `Analise a seguinte música segundo a tradição Presbiteriana Reformada:
+Tema do Ciclo de Votação: "${period.theme}" (${period.themeDefinition})
 Música: ${song.title} - ${song.author}
-Letra: "${song.lyrics}"`;
+Letra completa da música: "${song.lyrics}"`;
 
             try {
-                // Endpoint oficial do modelo Gemini 1.5 Flash
+                // Endpoint CORRETO para o Gemini 1.5 Flash
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        contents: [{ parts: [{ text: prompt }] }],
                         systemInstruction: {
-                            parts: [{ text: "Você é um Teólogo Presbiteriano. Avalie a música com rigor teológico reformado (teocentrismo, graça, reverência). Retorne APENAS um JSON válido com a propriedade 'status' (exatamente 'Aprovado' ou 'Reprovado') e 'reason' (Justificativa em até 3 frases)." }]
+                            parts: [{ text: "Você é um Teólogo Presbiteriano conservador. Avalie a música com rigor teológico reformado (focando no teocentrismo, graça soberana e reverência). Você DEVE retornar EXCLUSIVAMENTE um objeto JSON válido. O JSON deve ter apenas duas chaves: 'status' (cujo valor deve ser EXATAMENTE 'Aprovado' ou 'Reprovado') e 'reason' (uma justificativa teológica contendo no máximo 3 frases)." }]
                         },
+                        contents: [{ parts: [{ text: prompt }] }],
                         generationConfig: {
-                            responseMimeType: "application/json"
+                            responseMimeType: "application/json",
+                            temperature: 0.2 // Reduz a criatividade para evitar quebra do formato JSON
                         }
                     })
                 });
@@ -848,15 +841,15 @@ Letra: "${song.lyrics}"`;
                 const data = await res.json();
                 
                 if(data.error) {
-                     song.aiAnalysis = { status: "Erro", reason: "Erro na API: " + data.error.message }; 
+                     song.aiAnalysis = { status: "Erro", reason: "Ocorreu um erro na conexão com a IA: " + data.error.message }; 
                 } else {
                      let txt = data.candidates[0].content.parts[0].text;
                      song.aiAnalysis = JSON.parse(txt);
                 }
                 
             } catch (e) { 
-                console.error(e);
-                song.aiAnalysis = { status: "Erro", reason: "Servidor indisponível ou problema de conexão." }; 
+                console.error("Erro no processamento da IA:", e);
+                song.aiAnalysis = { status: "Erro", reason: "A Inteligência Artificial não pôde processar a resposta. Tente novamente." }; 
             }
             saveStateToFirebase(); 
             render();
@@ -967,6 +960,5 @@ Letra: "${song.lyrics}"`;
     </script>
 </body>
 </html>
-
 
 ```
