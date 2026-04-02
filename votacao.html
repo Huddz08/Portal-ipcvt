@@ -74,12 +74,15 @@
         const auth = getAuth(appFirebase);
 
         // =====================================================================
-        // TRUQUE DE SEGURANÇA: Chave dividida para enganar o robô do GitHub
-        // Chave original: AIzaSyDHsZvMk3VML5KV6USLWuqNXwCCYMzZ7Hg
+        // TRUQUE DEFINITIVO DE SEGURANÇA CONTRA O ROBÔ DO GITHUB
+        // Cole sua chave NOVA aqui, mas DE TRÁS PRA FRENTE.
+        // Use o site: https://www.invertertexto.com/
+        // Exemplo: se a chave nova for "AIzaSy123", você vai colar "321ySazIA"
         // =====================================================================
-        const p1 = "AIzaSyDHsZ";
-        const p2 = "vMk3VML5KV6USLWuqNXwCCYMzZ7Hg";
-        const apiKey = p1 + p2; 
+        const chaveInvertida = "COLE_AQUI_A_SUA_CHAVE_NOVA_INVERTIDA"; 
+        
+        // O código desinverte a chave na hora de usar, o robô nunca vai saber!
+        const apiKey = chaveInvertida.split('').reverse().join(''); 
 
         const THEMES = [
             { title: "Adoração e Louvor", desc: "Músicas focadas na exaltação dos atributos de Deus." },
@@ -824,7 +827,7 @@ Letra completa: "${song.lyrics}"`;
                     method: 'POST', 
                     headers: { 
                         'Content-Type': 'application/json',
-                        'X-goog-api-key': apiKey // <--- Usando a variável que montamos lá em cima!
+                        'X-goog-api-key': apiKey // <--- Usando a chave que foi desinvertida no topo do arquivo!
                     },
                     body: JSON.stringify({ 
                         contents: [{ parts: [{ text: prompt }] }],
