@@ -34,9 +34,10 @@
         }
     </script>
     <style>
-        .table-container::-webkit-scrollbar { height: 10px; width: 10px; }
-        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-        .table-container::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+        /* Estilização da Barra de Rolagem garantida e visível */
+        .table-container::-webkit-scrollbar { height: 14px; width: 12px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 1.5rem 1.5rem; border-top: 1px solid #e2e8f0; }
+        .table-container::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; border: 3px solid #f1f5f9; }
         .table-container::-webkit-scrollbar-thumb:hover { background: #b8962d; }
         
         .select-inline { width: 100%; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 6px; outline: none; cursor: pointer; transition: all 0.2s; }
@@ -49,13 +50,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+<!-- Usamos h-[100dvh] e overflow-hidden no body para travar a tela principal, forçando a barra de rolagem a ficar SÓ dentro da tabela -->
+<body class="bg-slate-50 text-slate-800 font-sans h-[100dvh] overflow-hidden">
 
     <!-- APLICATIVO PRINCIPAL -->
-    <div id="app-layout" class="min-h-screen flex flex-col md:flex-row w-full">
+    <div id="app-layout" class="h-full flex flex-col md:flex-row w-full">
         
         <!-- Sidebar -->
-        <nav class="bg-presb-green text-white w-full md:w-64 flex-shrink-0 shadow-2xl md:h-screen md:sticky top-0 z-20 border-r border-black/20 flex flex-col justify-between">
+        <nav class="bg-presb-green text-white w-full md:w-64 flex-shrink-0 shadow-2xl md:h-full z-20 border-r border-black/20 flex flex-col justify-between overflow-y-auto">
             <div>
                 <div class="p-8 text-center border-b border-white/5">
                     <i class="ph-fill ph-calendar-check text-5xl text-presb-gold mb-4 inline-block"></i>
@@ -100,16 +102,16 @@
         </nav>
 
         <!-- Área de Conteúdo -->
-        <main class="flex-1 p-6 md:p-10 bg-slate-50 relative overflow-hidden flex flex-col">
+        <main class="flex-1 p-4 md:p-8 bg-slate-50 relative flex flex-col h-full overflow-hidden">
             
             <div id="loading-data" class="absolute inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center">
                 <i class="ph ph-circle-notch text-6xl text-presb-gold animate-spin mb-4"></i>
                 <p class="text-presb-green font-black uppercase text-xs tracking-widest">Sincronizando Nuvem</p>
             </div>
 
-            <!-- ESCALAS -->
-            <section id="sec-escalas" class="tab-content block animate-fade-in flex-1 flex flex-col">
-                <div class="mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+            <!-- ESCALAS (Flex 1 + min-h-0 garante que a tabela ocupe apenas o espaço que sobra sem vazar) -->
+            <section id="sec-escalas" class="tab-content block animate-fade-in flex-1 flex flex-col min-h-0 w-full h-full">
+                <div class="mb-6 shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                     <div>
                         <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Escala de Domingos</h2>
                         <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic" id="escala-subtitle">
@@ -131,19 +133,21 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden flex-1 flex flex-col">
-                    <div class="table-container overflow-x-auto flex-1">
-                        <table class="w-full text-left whitespace-nowrap border-collapse">
-                            <thead class="sticky top-0 z-30 shadow-sm" id="escala-table-head"></thead>
-                            <tbody id="escala-table-body" class="text-xs divide-y divide-slate-100 font-medium"></tbody>
+                <!-- CORREÇÃO 1: Flex-1 + min-h-0 cria o quadrado perfeito com barra de rolagem obrigatoriamente dentro dele -->
+                <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0 w-full relative">
+                    <div class="table-container overflow-auto flex-1 min-h-0 w-full relative outline-none bg-slate-50">
+                        <table class="w-full text-left whitespace-nowrap border-collapse relative">
+                            <!-- Cabeçalho (thead) é gerado via Javascript com as classes sticky corretas -->
+                            <thead id="escala-table-head"></thead>
+                            <tbody id="escala-table-body" class="text-xs font-medium bg-white"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
             <!-- SUBSTITUIÇÕES -->
-            <section id="sec-substituicoes" class="tab-content hidden animate-fade-in">
-                <div class="mb-10">
+            <section id="sec-substituicoes" class="tab-content hidden animate-fade-in flex-1 flex-col overflow-y-auto pr-2">
+                <div class="mb-10 shrink-0">
                     <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Trocas e Faltas</h2>
                     <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic">Gestão de imprevistos e coberturas.</p>
                 </div>
@@ -211,8 +215,8 @@
             </section>
 
             <!-- ESTATÍSTICAS -->
-            <section id="sec-estatisticas" class="tab-content hidden animate-fade-in">
-                <div class="mb-10">
+            <section id="sec-estatisticas" class="tab-content hidden animate-fade-in flex-1 flex-col overflow-y-auto pr-2">
+                <div class="mb-10 shrink-0">
                     <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Relatório de Engajamento</h2>
                     <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic">Participação anual da equipe.</p>
                 </div>
@@ -237,8 +241,8 @@
             </section>
 
             <!-- CADASTRO -->
-            <section id="sec-cadastro" class="tab-content hidden animate-fade-in">
-                <div class="mb-10">
+            <section id="sec-cadastro" class="tab-content hidden animate-fade-in flex-1 flex-col overflow-y-auto pr-2">
+                <div class="mb-10 shrink-0">
                     <h2 class="text-3xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Equipe IPCVT</h2>
                     <p class="text-slate-500 text-xs mt-2 font-medium uppercase tracking-widest italic">Gerenciamento de Integrantes e Funções.</p>
                 </div>
@@ -338,9 +342,8 @@
         let isFirebaseConnected = false;
         let activeTab = 'escalas';
         
-        // Estado de Autenticação para Edição
         let isAdmin = sessionStorage.getItem('isAdmin') === 'true';
-        let pendingAction = null; // 'edit_escala' ou 'switch_tab'
+        let pendingAction = null; 
         let pendingTab = null;
 
         const COLUMNS_ORDER = [
@@ -357,9 +360,9 @@
         };
 
         const DEPT_COLORS = {
-            "Louvor": { header: "bg-emerald-50 text-emerald-900 border-emerald-100", cellAlt1: "bg-emerald-50/30", cellAlt2: "bg-emerald-50/60", border: "border-emerald-100" },
-            "Mídia": { header: "bg-blue-50 text-blue-900 border-blue-100", cellAlt1: "bg-blue-50/30", cellAlt2: "bg-blue-50/60", border: "border-blue-100" },
-            "Técnica": { header: "bg-amber-50 text-amber-900 border-amber-100", cellAlt1: "bg-amber-50/30", cellAlt2: "bg-amber-50/60", border: "border-amber-100" }
+            "Louvor": { header: "bg-emerald-100 text-emerald-900 border-emerald-200", cellAlt1: "bg-emerald-50/30", cellAlt2: "bg-emerald-50/70", border: "border-emerald-200" },
+            "Mídia": { header: "bg-blue-100 text-blue-900 border-blue-200", cellAlt1: "bg-blue-50/30", cellAlt2: "bg-blue-50/70", border: "border-blue-200" },
+            "Técnica": { header: "bg-amber-100 text-amber-900 border-amber-200", cellAlt1: "bg-amber-50/30", cellAlt2: "bg-amber-50/70", border: "border-amber-200" }
         };
 
         let appState = { members: {}, schedules: [], substitutions: [] };
@@ -368,7 +371,7 @@
         // INICIALIZAÇÃO E FIREBASE
         // ==========================================
         async function startApp() {
-            try { await signInAnonymously(auth); } catch (err) { console.warn("Modo offline ativo", err); }
+            try { await signInAnonymously(auth); } catch (err) { console.warn("Modo offline ativo"); }
             initFirebaseConnection();
             updateAuthUI();
         }
@@ -415,10 +418,36 @@
             while (date.getFullYear() === CURRENT_YEAR) {
                 if (date.getMonth() !== currentMonth) { currentMonth = date.getMonth(); weekOfMonth = 1; }
                 const dateStr = date.toLocaleDateString('en-CA'); 
-                sundays.push({ date: dateStr, dom: `${weekOfMonth}º`, assignments: {} });
+                
+                // --- Lógica Inteligente de Preenchimento Baseada na Imagem Oficial de 2026 ---
+                let assignments = {};
+                if (weekOfMonth === 1) {
+                    assignments = { "Soprano": "Jamylle", "Contralto": "Liliane", "Tenor": "Hudson", "Violão": "Guilherme", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Jean Lucas" };
+                } else if (weekOfMonth === 2) {
+                    assignments = { "Soprano": "Laura", "Contralto": [3,4,8,10].includes(currentMonth) ? "Roberta" : "Daiane", "Tenor": "Pastor", "Violão": "Pastor", "Guitarra": "Germano", "Baixo": "João Victor", "Bateria": "Flávio" };
+                } else if (weekOfMonth === 3) {
+                    assignments = { "Soprano": "Mônica", "Contralto": [3,4,8,10].includes(currentMonth) ? "Daiane" : "Roberta", "Guitarra": "Allysson", "Baixo": "Lorran", "Bateria": "Pedro" };
+                    if (currentMonth === 0) { assignments["Tenor"] = "João Victor"; assignments["Violão"] = "Alexandre"; }
+                    else if ([3,4,8,10].includes(currentMonth)) { assignments["Tenor"] = "Jean Lucas"; assignments["Violão"] = "Jean Lucas"; }
+                    else { assignments["Tenor"] = "Hudson"; assignments["Violão"] = "Alexandre"; }
+                } else if (weekOfMonth === 4) {
+                    assignments = { "Soprano": "Arlete", "Contralto": "Amanda", "Guitarra": "Nilson", "Bateria": "Flávio" };
+                    if (currentMonth === 0) { assignments["Tenor"] = "Pastor"; assignments["Violão"] = "Pastor"; assignments["Baixo"] = "João Victor"; }
+                    else if ([3,4,11].includes(currentMonth)) { assignments["Tenor"] = "Hudson"; assignments["Violão"] = "Alexandre"; assignments["Baixo"] = currentMonth === 4 ? "João Victor" : "Angelo"; }
+                    else { assignments["Tenor"] = "Jean Lucas"; assignments["Violão"] = "Jean Lucas"; assignments["Baixo"] = [6,8,10].includes(currentMonth) ? "João Victor" : "Angelo"; }
+                } else if (weekOfMonth === 5) {
+                    assignments = { "Soprano": "Arlete", "Tenor": "Pastor", "Violão": "Pastor", "Guitarra": "Allysson", "Baixo": "Nilson", "Bateria": "Pedro" };
+                    if (currentMonth === 2) assignments["Contralto"] = "Roberta";
+                    if (currentMonth === 4) assignments["Contralto"] = "Daiane";
+                    if (currentMonth === 7) assignments["Contralto"] = "Liliane";
+                    if (currentMonth === 10) assignments["Contralto"] = "Amanda";
+                }
+
+                sundays.push({ date: dateStr, dom: `${weekOfMonth}º`, assignments });
                 date.setDate(date.getDate() + 7);
                 weekOfMonth++;
             }
+
             appState.schedules = sundays;
             appState.substitutions = [];
             appState.members = {
@@ -443,7 +472,7 @@
         // ==========================================
         function requestAuth(action, target = null) {
             if (isAdmin) {
-                if (action === 'edit_escala') return; // Já é admin
+                if (action === 'edit_escala') return; 
                 if (action === 'switch_tab') proceedSwitchTab(target);
                 return;
             }
@@ -520,13 +549,20 @@
 
         function proceedSwitchTab(tabId) {
             activeTab = tabId;
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-white/5', 'text-white', 'border-presb-gold');
                 btn.classList.add('text-white/50', 'border-transparent');
             });
 
-            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            const activeSection = document.getElementById(`sec-${tabId}`);
+            activeSection.classList.remove('hidden');
+            if (tabId === 'escalas') activeSection.classList.add('flex'); // Mantém o flex na tabela
+            else activeSection.classList.add('block'); // Block nas outras
+
             const activeBtn = document.getElementById(`tab-${tabId}`);
             activeBtn.classList.remove('text-white/50', 'border-transparent');
             activeBtn.classList.add('bg-white/5', 'text-white', 'border-presb-gold');
@@ -542,17 +578,19 @@
         }
 
         // ==========================================
-        // RENDERIZAÇÃO: ESCALAS
+        // RENDERIZAÇÃO: ESCALAS COM CABEÇALHO FIXO
         // ==========================================
         function renderEscalas() {
             const thead = document.getElementById('escala-table-head');
-            let thHTML = `<tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-widest border-b-2 border-slate-200">
-                            <th class="p-4 font-black sticky left-0 bg-slate-50 z-20 w-28 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Data</th>
-                            <th class="p-4 font-black sticky left-28 bg-slate-50 z-20 w-16 border-r border-slate-200 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Dom</th>`;
+            
+            // CORREÇÃO 2: Classes `sticky` distribuídas estrategicamente para travar o topo e os cantos
+            let thHTML = `<tr class="text-slate-500 text-[10px] uppercase tracking-widest bg-slate-100 shadow-md border-b-2 border-slate-200">
+                            <th class="p-4 font-black sticky top-0 left-0 bg-slate-100 z-[60] w-28 border-r border-slate-200">Data</th>
+                            <th class="p-4 font-black sticky top-0 left-28 bg-slate-100 z-[60] w-16 border-r border-slate-200 text-center">Dom</th>`;
             COLUMNS_ORDER.forEach(col => {
                 const dept = DEPARTMENTS[col];
                 const headerColor = DEPT_COLORS[dept].header;
-                thHTML += `<th class="p-4 font-black min-w-[160px] border-r border-b-2 ${headerColor}">${col}</th>`;
+                thHTML += `<th class="p-4 font-black sticky top-0 z-[50] min-w-[160px] border-r border-slate-200 ${headerColor}">${col}</th>`;
             });
             thHTML += `</tr>`;
             thead.innerHTML = thHTML;
@@ -573,9 +611,10 @@
                 const tr = document.createElement('tr');
                 tr.className = index % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50 hover:bg-slate-100';
                 
+                // Células da esquerda coladas (z-40 para passar por baixo do z-60 do topo)
                 let rowHTML = `
-                    <td class="p-4 font-bold sticky left-0 z-10 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} text-slate-700">${formatDateBR(esc.date)}</td>
-                    <td class="p-3 sticky left-28 z-10 border-r border-slate-200 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
+                    <td class="p-4 font-bold sticky left-0 z-[40] border-r border-b border-slate-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} text-slate-700">${formatDateBR(esc.date)}</td>
+                    <td class="p-3 sticky left-28 z-[40] border-r border-b border-slate-100 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
                         <span class="bg-presb-green/10 text-presb-green text-[10px] px-2.5 py-1.5 rounded-lg font-black">${esc.dom}</span>
                     </td>
                 `;
@@ -619,17 +658,16 @@
 
                         cellContent = `<select id="sel-${esc.date}-${roleId}" onchange="updateAssignment('${esc.date}', '${role}', this.value)" class="${selectClass}" ${tooltip}>${options}</select>`;
                     } else {
-                        // Modo Leitura
                         if (currentPerson) {
                             const isDuplicated = personDepts[currentPerson] && personDepts[currentPerson].size > 1;
                             const textClass = isDuplicated ? 'text-red-600 font-black' : 'text-presb-green font-bold';
                             cellContent = `<span class="${textClass} text-xs px-2" ${isDuplicated ? 'title="Escalado em múltiplas funções!"' : ''}>${currentPerson}</span>`;
                         } else {
-                            cellContent = `<span class="text-slate-300 text-xs italic px-2 font-medium">- Livre -</span>`;
+                            cellContent = `<span class="text-slate-300 text-[10px] italic px-2 font-bold uppercase tracking-widest">- Livre -</span>`;
                         }
                     }
                     
-                    rowHTML += `<td class="p-2 border-r ${borderColor} last:border-none ${bgCellClass}">${cellContent}</td>`;
+                    rowHTML += `<td class="p-2 border-r border-b border-slate-100 ${borderColor} last:border-none ${bgCellClass}">${cellContent}</td>`;
                 });
 
                 tr.innerHTML = rowHTML;
@@ -642,7 +680,7 @@
             if(schedule) {
                 newValue ? schedule.assignments[role] = newValue : delete schedule.assignments[role];
                 saveStateToFirebase();
-                renderEscalas(); // Re-renderiza para atualizar cores de duplicidade
+                renderEscalas(); 
             }
         }
 
@@ -937,3 +975,6 @@
     </script>
 </body>
 </html>
+
+
+```
