@@ -1,9 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <!-- A trava 'maximum-scale=1.0, user-scalable=no' impede o celular de espremer e bugar a tabela -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestão de Escala - Núcleo IPCVT</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,19 +34,18 @@
         }
     </script>
     <style>
-        /* Estilização da Barra de Rolagem - Menor no celular para não atrapalhar */
+        /* Estilização da Barra de Rolagem */
         .table-container::-webkit-scrollbar { height: 10px; width: 8px; }
         @media (min-width: 768px) { .table-container::-webkit-scrollbar { height: 14px; width: 12px; } }
         
-        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 1.5rem 1.5rem; border-top: 1px solid #e2e8f0; }
+        .table-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 1.5rem 1.5rem; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; }
         .table-container::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; border: 2px solid #f1f5f9; }
         .table-container::-webkit-scrollbar-thumb:hover { background: #b8962d; }
         
-        /* Selects se adaptam ao tamanho da tela */
         .select-inline { width: 100%; background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 2px; outline: none; cursor: pointer; transition: all 0.2s; font-size: 10px; }
         @media (min-width: 768px) { .select-inline { padding: 6px; border-radius: 6px; font-size: 12px; } }
         
-        .select-inline:hover { background: rgba(255, 255, 255, 0.5); border-color: #cbd5e1; }
+        .select-inline:hover { background: rgba(255, 255, 255, 0.5); border-color: #ffffff; }
         .select-inline:focus { background: white; border-color: #D4AF37; box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2); }
         .select-inline.filled { font-weight: 700; color: #1B4332; }
         .select-inline.duplicated { font-weight: 800; color: #dc2626; background-color: #fef2f2; border-color: #fca5a5; }
@@ -60,13 +57,11 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<!-- h-[100dvh] e overflow-hidden cravam o aplicativo exatamente no tamanho da tela -->
 <body class="bg-slate-50 text-slate-800 font-sans h-[100dvh] overflow-hidden">
 
-    <!-- APLICATIVO PRINCIPAL -->
     <div id="app-layout" class="h-full flex flex-col md:flex-row w-full overflow-hidden">
         
-        <!-- Sidebar / Navegação -->
+        <!-- Sidebar -->
         <nav class="bg-presb-green text-white w-full md:w-64 shrink-0 shadow-2xl md:h-full z-20 border-b md:border-r border-black/20 flex flex-col justify-between">
             <div class="hidden md:block">
                 <div class="p-8 text-center border-b border-white/5">
@@ -111,7 +106,7 @@
             </div>
         </nav>
 
-        <!-- Área de Conteúdo (min-w-0 e min-h-0 forçam o conteúdo a respeitar a tela) -->
+        <!-- Área de Conteúdo -->
         <main class="flex-1 p-2 sm:p-4 md:p-8 bg-slate-50 relative flex flex-col min-w-0 min-h-0 overflow-hidden">
             
             <div id="loading-data" class="absolute inset-0 bg-white/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center">
@@ -121,13 +116,10 @@
 
             <!-- ESCALAS -->
             <section id="sec-escalas" class="tab-content block animate-fade-in flex-1 flex flex-col min-h-0 min-w-0 w-full h-full">
-                <!-- Cabeçalho da Seção -->
                 <div class="mb-4 md:mb-6 shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-3 md:gap-6 px-1">
                     <div>
                         <h2 class="text-2xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Escala de Domingos</h2>
-                        <p class="text-slate-500 text-[10px] md:text-xs mt-1 md:mt-2 font-medium uppercase tracking-widest italic" id="escala-subtitle">
-                            Modo de visualização.
-                        </p>
+                        <p class="text-slate-500 text-[10px] md:text-xs mt-1 md:mt-2 font-medium uppercase tracking-widest italic" id="escala-subtitle">Modo de visualização.</p>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-2 md:gap-3 w-full lg:w-auto">
@@ -146,9 +138,8 @@
                     </div>
                 </div>
 
-                <!-- Tabela de Fato -->
-                <div class="bg-white rounded-[1rem] md:rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0 min-w-0 w-full relative">
-                    <div class="table-container overflow-auto flex-1 min-h-0 w-full relative outline-none bg-slate-50 touch-pan-x touch-pan-y">
+                <div class="bg-white rounded-[1rem] md:rounded-[2rem] shadow-xl border-2 border-white overflow-hidden flex-1 flex flex-col min-h-0 min-w-0 w-full relative">
+                    <div class="table-container overflow-auto flex-1 min-h-0 w-full relative outline-none bg-slate-100 touch-pan-x touch-pan-y">
                         <table class="w-full text-left whitespace-nowrap border-collapse relative">
                             <thead id="escala-table-head"></thead>
                             <tbody id="escala-table-body" class="font-medium bg-white"></tbody>
@@ -195,40 +186,54 @@
                         </form>
                     </div>
 
-                    <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-slate-100 lg:col-span-2 overflow-hidden flex flex-col">
-                        <div class="p-4 md:p-6 border-b border-slate-100 bg-slate-50">
+                    <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl border-2 border-white lg:col-span-2 overflow-hidden flex flex-col">
+                        <div class="p-4 md:p-6 border-b-2 border-white bg-slate-100">
                             <h3 class="font-serif font-bold text-presb-green text-sm md:text-base">Histórico</h3>
                         </div>
-                        <div class="overflow-x-auto flex-1">
-                            <table class="w-full text-left whitespace-nowrap">
+                        <div class="overflow-x-auto flex-1 bg-slate-50">
+                            <table class="w-full text-left whitespace-nowrap border-collapse">
                                 <thead>
-                                    <tr class="bg-white text-slate-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest border-b border-slate-200">
-                                        <th class="p-3 md:p-5">Data/Turno</th><th class="p-3 md:p-5">Função</th><th class="p-3 md:p-5 text-red-500">Faltou</th><th class="p-3 md:p-5 text-emerald-600">Substituiu</th><th class="p-3 md:p-5"></th>
+                                    <tr class="bg-slate-200 text-slate-600 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
+                                        <th class="p-3 md:p-5 border-2 border-white">Data/Turno</th><th class="p-3 md:p-5 border-2 border-white">Função</th><th class="p-3 md:p-5 text-red-600 border-2 border-white">Faltou</th><th class="p-3 md:p-5 text-emerald-700 border-2 border-white">Substituiu</th><th class="p-3 md:p-5 border-2 border-white"></th>
                                     </tr>
                                 </thead>
-                                <tbody id="substituicoes-table-body" class="text-[10px] md:text-xs divide-y divide-slate-50 font-medium text-slate-700"></tbody>
+                                <tbody id="substituicoes-table-body" class="text-[10px] md:text-xs font-medium text-slate-700"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- ESTATÍSTICAS -->
-            <section id="sec-estatisticas" class="tab-content hidden animate-fade-in flex-1 flex-col overflow-y-auto px-1 md:pr-2">
-                <div class="mb-6 md:mb-10 shrink-0">
-                    <h2 class="text-2xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Engajamento</h2>
-                    <p class="text-slate-500 text-[10px] md:text-xs mt-1 md:mt-2 font-medium uppercase tracking-widest italic">Participação anual da equipe.</p>
+            <!-- ESTATÍSTICAS (NOVO LAYOUT INTERATIVO E COM SCROLL) -->
+            <section id="sec-estatisticas" class="tab-content hidden animate-fade-in flex-1 flex flex-col min-h-0 min-w-0 w-full h-full">
+                <!-- Cabeçalho com Busca -->
+                <div class="mb-4 md:mb-6 shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-3 md:gap-6 px-1">
+                    <div>
+                        <h2 class="text-2xl md:text-4xl font-bold text-presb-green font-serif tracking-tight">Engajamento</h2>
+                        <p class="text-slate-500 text-[10px] md:text-xs mt-1 md:mt-2 font-medium uppercase tracking-widest italic">Painel Gráfico de Participação</p>
+                    </div>
+                    
+                    <div class="w-full lg:w-80 flex items-center bg-white border-2 border-slate-200 rounded-xl px-4 py-2 md:py-3 shadow-sm focus-within:border-presb-gold focus-within:ring-4 focus-within:ring-presb-gold/10 transition-all">
+                        <i class="ph-bold ph-magnifying-glass text-slate-400 text-lg mr-3"></i>
+                        <input type="text" id="search-stats" onkeyup="renderEstatisticas()" placeholder="Buscar integrante..." class="bg-transparent outline-none w-full text-xs md:text-sm font-bold text-slate-700 placeholder-slate-400">
+                    </div>
                 </div>
 
-                <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left whitespace-nowrap">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-widest border-b border-slate-200">
-                                    <th class="p-3 md:p-5">Integrante</th><th class="p-3 md:p-5 text-center">Escalado</th><th class="p-3 md:p-5 text-center text-red-500">Faltas</th><th class="p-3 md:p-5 text-center text-emerald-600">Extra</th><th class="p-3 md:p-5 text-center">Real</th><th class="p-3 md:p-5 text-right">%</th>
+                <!-- Tabela de Estatísticas com Scroll Próprio, Barra de Progresso e Fontes Menores -->
+                <div class="bg-white rounded-[1rem] md:rounded-[2rem] shadow-xl border-2 border-white overflow-hidden flex-1 flex flex-col min-h-0 min-w-0 w-full relative">
+                    <div class="table-container overflow-auto flex-1 min-h-0 w-full relative outline-none bg-slate-50 touch-pan-x touch-pan-y">
+                        <table class="w-full text-left whitespace-nowrap border-collapse relative">
+                            <thead class="sticky top-0 z-[60] shadow-sm">
+                                <tr class="bg-slate-200 text-slate-600 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">
+                                    <th class="p-2 md:p-4 sticky top-0 left-0 bg-slate-200 z-[70] border-2 border-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Integrante</th>
+                                    <th class="p-1 md:p-2 text-center border-2 border-white" title="Domingos Escalados">Escalado</th>
+                                    <th class="p-1 md:p-2 text-center text-red-600 border-2 border-white" title="Faltas Registradas">Faltas</th>
+                                    <th class="p-1 md:p-2 text-center text-emerald-700 border-2 border-white" title="Substituições Extra">Extra</th>
+                                    <th class="p-1 md:p-2 text-center font-black border-2 border-white" title="Total de Participações Reais">Real</th>
+                                    <th class="p-2 md:p-4 text-right w-full md:w-48 border-2 border-white">Desempenho</th>
                                 </tr>
                             </thead>
-                            <tbody id="estatisticas-table-body" class="text-[10px] md:text-sm divide-y divide-slate-50"></tbody>
+                            <tbody id="estatisticas-table-body" class="text-[10px] md:text-sm bg-white"></tbody>
                         </table>
                     </div>
                 </div>
@@ -353,10 +358,11 @@
             "Op. Som": "Técnica", "Projeção": "Técnica"
         };
 
+        // Reduzimos as opacidades da tabela de escala e removemos as bordas coloridas pra forçar o border-white
         const DEPT_COLORS = {
-            "Louvor": { header: "bg-emerald-100 text-emerald-900 border-emerald-200", cellAlt1: "bg-emerald-50/30", cellAlt2: "bg-emerald-50/70", border: "border-emerald-200" },
-            "Mídia": { header: "bg-blue-100 text-blue-900 border-blue-200", cellAlt1: "bg-blue-50/30", cellAlt2: "bg-blue-50/70", border: "border-blue-200" },
-            "Técnica": { header: "bg-amber-100 text-amber-900 border-amber-200", cellAlt1: "bg-amber-50/30", cellAlt2: "bg-amber-50/70", border: "border-amber-200" }
+            "Louvor": { header: "bg-emerald-100 text-emerald-900", cellAlt1: "bg-emerald-50/50", cellAlt2: "bg-emerald-100/50" },
+            "Mídia": { header: "bg-blue-100 text-blue-900", cellAlt1: "bg-blue-50/50", cellAlt2: "bg-blue-100/50" },
+            "Técnica": { header: "bg-amber-100 text-amber-900", cellAlt1: "bg-amber-50/50", cellAlt2: "bg-amber-100/50" }
         };
 
         let appState = { members: {}, schedules: [], substitutions: [] };
@@ -477,9 +483,13 @@
             e.preventDefault();
             if (document.getElementById('auth-password').value === APP_PASSWORD) {
                 isAdmin = true; sessionStorage.setItem('isAdmin', 'true');
-                closeAuthModal(); updateAuthUI();
+                closeAuthModal(); 
+                updateAuthUI();
+                
+                // Redireciona de forma inteligente: Se for tab switch, vai; senão, recarrega a tabela atual editável.
                 if (pendingAction === 'switch_tab') proceedSwitchTab(pendingTab);
-                else if (pendingAction === 'edit_escala') renderEscalas();
+                else refreshCurrentTab(); 
+                
                 showToast("Acesso Liberado");
             } else {
                 document.getElementById('auth-error').classList.remove('hidden');
@@ -528,7 +538,7 @@
 
             const actSec = document.getElementById(`sec-${tabId}`);
             actSec.classList.remove('hidden');
-            if (tabId === 'escalas') actSec.classList.add('flex'); else actSec.classList.add('flex');
+            if (tabId === 'escalas' || tabId === 'estatisticas') actSec.classList.add('flex'); else actSec.classList.add('flex');
 
             const actBtn = document.getElementById(`tab-${tabId}`);
             actBtn.classList.remove('text-white/50', 'border-transparent');
@@ -544,18 +554,17 @@
         }
 
         // ==========================================
-        // RENDERIZAÇÃO: ESCALAS MOBILE FIXED
+        // RENDERIZAÇÃO: ESCALAS (AGORA COM BORDAS BRANCAS)
         // ==========================================
         function renderEscalas() {
             const thead = document.getElementById('escala-table-head');
             
-            // CABEÇALHO (Compactado para mobile, largo no Desktop)
-            let thHTML = `<tr class="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest bg-slate-100 shadow-md border-b-2 border-slate-200">
-                            <th class="p-2 md:p-4 font-black sticky top-0 left-0 bg-slate-100 z-[60] w-[65px] min-w-[65px] md:w-[112px] md:min-w-[112px] border-r border-slate-200 text-center md:text-left shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Data</th>
-                            <th class="p-1 md:p-4 font-black sticky top-0 left-[65px] md:left-[112px] bg-slate-100 z-[60] w-[35px] min-w-[35px] md:w-[64px] md:min-w-[64px] border-r border-slate-200 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Dom</th>`;
+            let thHTML = `<tr class="text-slate-600 text-[9px] md:text-[10px] uppercase tracking-widest bg-slate-200 shadow-md">
+                            <th class="p-2 md:p-4 font-black sticky top-0 left-0 bg-slate-200 z-[60] w-[65px] min-w-[65px] md:w-[112px] md:min-w-[112px] border-2 border-white text-center md:text-left shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Data</th>
+                            <th class="p-1 md:p-4 font-black sticky top-0 left-[65px] md:left-[112px] bg-slate-200 z-[60] w-[35px] min-w-[35px] md:w-[64px] md:min-w-[64px] border-2 border-white text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Dom</th>`;
             COLUMNS_ORDER.forEach(col => {
                 const dept = DEPARTMENTS[col];
-                thHTML += `<th class="p-2 md:p-4 font-black sticky top-0 z-[50] min-w-[110px] md:min-w-[160px] border-r border-slate-200 ${DEPT_COLORS[dept].header}">${col}</th>`;
+                thHTML += `<th class="p-2 md:p-4 font-black sticky top-0 z-[50] min-w-[110px] md:min-w-[160px] border-2 border-white ${DEPT_COLORS[dept].header}">${col}</th>`;
             });
             thHTML += `</tr>`;
             thead.innerHTML = thHTML;
@@ -572,16 +581,16 @@
             }
 
             filteredSchedules.forEach((esc, index) => {
+                const rowBg = index % 2 === 0 ? 'bg-slate-50' : 'bg-slate-100';
                 const tr = document.createElement('tr');
-                tr.className = index % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50 hover:bg-slate-100';
+                tr.className = `${rowBg} hover:bg-presb-gold/10 transition-colors`;
                 
-                // LINHAS COLADAS NA ESQUERDA (Z-Index estratégico e Data abreviada no mobile)
                 let rowHTML = `
-                    <td class="p-1 md:p-4 font-bold sticky left-0 z-[40] border-r border-b border-slate-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} text-slate-700 text-[10px] md:text-sm text-center md:text-left">
+                    <td class="p-1 md:p-4 font-bold sticky left-0 z-[40] border-2 border-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${rowBg} text-slate-700 text-[10px] md:text-sm text-center md:text-left">
                         <span class="md:hidden">${formatDateBR(esc.date).substring(0,5)}</span>
                         <span class="hidden md:inline">${formatDateBR(esc.date)}</span>
                     </td>
-                    <td class="p-1 md:p-3 sticky left-[65px] md:left-[112px] z-[40] border-r border-b border-slate-100 text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">
+                    <td class="p-1 md:p-3 sticky left-[65px] md:left-[112px] z-[40] border-2 border-white text-center shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${rowBg}">
                         <span class="bg-presb-green/10 text-presb-green text-[9px] md:text-[10px] px-1 md:px-2.5 py-1 md:py-1.5 rounded font-black block md:inline">${esc.dom.replace('º','')}</span>
                     </td>
                 `;
@@ -613,7 +622,7 @@
                         }
                     }
                     
-                    rowHTML += `<td class="p-1 md:p-2 border-r border-b border-slate-100 ${DEPT_COLORS[dept].border} last:border-none ${bgCellClass}">${cellContent}</td>`;
+                    rowHTML += `<td class="p-1 md:p-2 border-2 border-white ${bgCellClass}">${cellContent}</td>`;
                 });
 
                 tr.innerHTML = rowHTML;
@@ -630,7 +639,7 @@
         }
 
         // ==========================================
-        // OUTRAS FUNÇÕES (MANTIDAS)
+        // UTILITÁRIOS E EXPORTAÇÃO PDF
         // ==========================================
         function getUniqueMembers() {
             const all = new Set();
@@ -677,6 +686,9 @@
             } catch (error) { showToast("Erro no PDF", true); }
         }
 
+        // ==========================================
+        // SUBSTITUIÇÕES (BORDAS BRANCAS)
+        // ==========================================
         function updateAbsentPerson() {
             const date = document.getElementById('sub-data').value;
             const role = document.getElementById('sub-funcao').value;
@@ -733,22 +745,26 @@
             const tbody = document.getElementById('substituicoes-table-body');
             const subsArray = [...(appState.substitutions || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            if(subsArray.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Vazio</td></tr>`; return; }
+            if(subsArray.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 border-2 border-white">Vazio</td></tr>`; return; }
 
-            tbody.innerHTML = subsArray.map(sub => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-3 md:p-5 font-bold text-slate-800">${formatDateBR(sub.date)} <span class="block text-[9px] text-slate-400">${sub.turno || 'Ambos'}</span></td>
-                    <td class="p-3 md:p-5 font-medium">${sub.role}</td><td class="p-3 md:p-5 text-red-500 font-bold">(-) ${sub.absent}</td>
-                    <td class="p-3 md:p-5 text-emerald-600 font-bold">(+) ${sub.substitute}</td>
-                    <td class="p-3 md:p-5 text-center"><button onclick="deleteSubstituicao('${sub.id}')" class="text-red-400 hover:text-red-600"><i class="ph-fill ph-trash text-lg"></i></button></td>
+            tbody.innerHTML = subsArray.map((sub, index) => `
+                <tr class="${index % 2 === 0 ? 'bg-slate-50' : 'bg-slate-100'}">
+                    <td class="p-3 md:p-5 font-bold text-slate-800 border-2 border-white">${formatDateBR(sub.date)} <span class="block text-[9px] text-slate-400">${sub.turno || 'Ambos'}</span></td>
+                    <td class="p-3 md:p-5 font-medium border-2 border-white">${sub.role}</td>
+                    <td class="p-3 md:p-5 text-red-600 font-bold border-2 border-white">(-) ${sub.absent}</td>
+                    <td class="p-3 md:p-5 text-emerald-700 font-bold border-2 border-white">(+) ${sub.substitute}</td>
+                    <td class="p-3 md:p-5 text-center border-2 border-white"><button onclick="deleteSubstituicao('${sub.id}')" class="text-red-400 hover:text-red-600"><i class="ph-fill ph-trash text-lg"></i></button></td>
                 </tr>
             `).join('');
         }
 
+        // ==========================================
+        // ESTATÍSTICAS (NOVO LAYOUT BORDAS BRANCAS + COLUNAS MENORES)
+        // ==========================================
         function renderEstatisticas() {
             const uniqueMembers = getUniqueMembers();
             const subsArray = appState.substitutions || [];
-            const stats = [];
+            let stats = [];
 
             uniqueMembers.forEach(nome => {
                 let esperado = 0;
@@ -769,17 +785,43 @@
                 stats.push({ nome, esperado, faltas, extras, totalReal, percentual: parseFloat(percentual) });
             });
 
+            // Filtro da barra de pesquisa interativa
+            const searchTerm = document.getElementById('search-stats')?.value.toLowerCase() || '';
+            if (searchTerm) {
+                stats = stats.filter(st => st.nome.toLowerCase().includes(searchTerm));
+            }
+
+            // Ordena pelo maior percentual, depois alfabeticamente
             stats.sort((a, b) => b.percentual - a.percentual || a.nome.localeCompare(b.nome));
             
-            document.getElementById('estatisticas-table-body').innerHTML = stats.map(st => {
-                let badgeClass = st.percentual < 50 ? 'bg-red-50 text-red-700 border-red-200' : (st.percentual < 80 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+            const tbody = document.getElementById('estatisticas-table-body');
+
+            if(stats.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum integrante encontrado</td></tr>`;
+                 return;
+            }
+
+            tbody.innerHTML = stats.map((st, index) => {
+                const rowBg = index % 2 === 0 ? 'bg-slate-50' : 'bg-slate-100';
+                // Cores dinâmicas para a barra e o badge baseado na saúde da participação
+                let barColor = st.percentual < 50 ? 'bg-red-500' : (st.percentual < 80 ? 'bg-amber-400' : 'bg-emerald-500');
+                let badgeClass = st.percentual < 50 ? 'text-red-700 bg-red-50 border-red-200' : (st.percentual < 80 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200');
+                
                 return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 md:p-5 font-black text-presb-green">${st.nome}</td><td class="p-3 md:p-5 text-center font-bold text-slate-500">${st.esperado}</td>
-                        <td class="p-3 md:p-5 text-center font-bold ${st.faltas > 0 ? 'text-red-500' : 'text-slate-300'}">${st.faltas > 0 ? '-'+st.faltas : 0}</td>
-                        <td class="p-3 md:p-5 text-center font-bold ${st.extras > 0 ? 'text-emerald-600' : 'text-slate-300'}">${st.extras > 0 ? '+'+st.extras : 0}</td>
-                        <td class="p-3 md:p-5 text-center font-black text-lg">${st.totalReal}</td>
-                        <td class="p-3 md:p-5 text-right"><span class="px-2 py-1 rounded border text-[9px] font-black ${badgeClass}">${st.percentual}%</span></td>
+                    <tr class="${rowBg} hover:bg-presb-gold/10 transition-colors">
+                        <td class="p-2 md:p-4 font-black text-presb-green sticky left-0 z-[40] ${rowBg} border-2 border-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">${st.nome}</td>
+                        <td class="p-1 md:p-2 text-center font-bold text-slate-500 text-[10px] md:text-xs border-2 border-white">${st.esperado}</td>
+                        <td class="p-1 md:p-2 text-center font-bold ${st.faltas > 0 ? 'text-red-600' : 'text-slate-300'} text-[10px] md:text-xs border-2 border-white">${st.faltas > 0 ? '-'+st.faltas : 0}</td>
+                        <td class="p-1 md:p-2 text-center font-bold ${st.extras > 0 ? 'text-emerald-700' : 'text-slate-300'} text-[10px] md:text-xs border-2 border-white">${st.extras > 0 ? '+'+st.extras : 0}</td>
+                        <td class="p-1 md:p-2 text-center font-black text-xs md:text-sm border-2 border-white">${st.totalReal}</td>
+                        <td class="p-2 md:p-4 border-2 border-white">
+                            <div class="flex flex-col items-end gap-1 md:gap-2 w-full min-w-[80px] md:min-w-[120px]">
+                                <span class="px-2 py-1 rounded-md border text-[9px] md:text-[10px] font-black tracking-widest ${badgeClass}">${st.percentual}%</span>
+                                <div class="w-full bg-slate-200 rounded-full h-1 md:h-2 overflow-hidden shadow-inner">
+                                    <div class="${barColor} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${Math.min(st.percentual, 100)}%"></div>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -849,9 +891,9 @@
         window.updateAbsentPerson = updateAbsentPerson; window.handleSubstituicao = handleSubstituicao;
         window.deleteSubstituicao = deleteSubstituicao; window.handleAddMember = handleAddMember; window.deleteMember = deleteMember;
         window.closeConfirmModal = closeConfirmModal;
+        window.renderEstatisticas = renderEstatisticas;
 
         window.onload = startApp;
     </script>
 </body>
 </html>
-
